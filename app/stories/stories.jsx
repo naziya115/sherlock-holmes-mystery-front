@@ -3,40 +3,48 @@ import axios from 'axios';
 import Link from "next/link";
 import { useEffect, useRef, useState } from 'react';
 
-
-
 const Stories = () => {
-  const [stories, setStories] = useState(null)
-  const didFetchRef = useRef(false)
-
+  const [stories, setStories] = useState(null);
+  const didFetchRef = useRef(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if(didFetchRef.current == false){
-      didFetchRef.current = true
-      fetchStories()
-      print(stories)
+    if (!didFetchRef.current) {
+      didFetchRef.current = true;
+      fetchStories();
     }
-  }, [stories])
-  
+  }, []);
 
   const fetchStories = async () => {
-    let path = "/"
-    const res = await axios.get("http://localhost:8000/stories/", {
-      method: 'GET',
-      headers: { "accept": "application/json",
-                "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2NDllYTQ3NjgyZjYwZDc5NTc3MzFhYjYiLCJleHAiOjE2ODk2OTc0NTh9.mWksmWwzJZ8Ffu386atFnZDJ2KkKmHUOzuu03JkFAT8"},
-    })
-    const stories_inp = await res.data.stories
-    setStories(stories_inp)
-    console.log("stories:", stories_inp)
+    try {
+      const res = await axios.get("http://localhost:8000/stories/", {
+        method: 'GET',
+        headers: {
+          "accept": "application/json",
+          "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2NDllYTQ3NjgyZjYwZDc5NTc3MzFhYjYiLCJleHAiOjE2ODk2OTc0NTh9.mWksmWwzJZ8Ffu386atFnZDJ2KkKmHUOzuu03JkFAT8"
+        },
+      });
+
+      const stories_inp = res.data.stories;
+      setStories(stories_inp);
+      setLoading(false);
+      console.log("stories:", stories_inp);
+    } catch (error) {
+      console.error("Error fetching stories:", error);
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return <div>Loading...</div>; 
   }
 
   if (!stories) {
-    return <div>Loading...</div>;
+    return <div>No stories found.</div>; 
   }
 
   return (
-  <div className="flex flex-col items-center">
+       <div className="flex flex-col items-center">
     {
       stories.map((story) => (
         <Link href={`/stories/${story._id}`} key={story._id}>
@@ -51,8 +59,7 @@ const Stories = () => {
     }
     
   </div>
-
-  )
-}
+  );
+};
 
 export default Stories

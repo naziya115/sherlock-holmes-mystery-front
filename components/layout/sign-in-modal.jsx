@@ -1,6 +1,5 @@
-import { Google, LoadingDots } from "@/components/shared/icons";
 import { Dialog, Transition } from '@headlessui/react';
-import { signIn } from "next-auth/react";
+import axios from "axios";
 import Image from "next/image";
 import {
   Fragment,
@@ -14,6 +13,52 @@ const SignInModal = ({
   setShowSignInModal,
 }) => {
   const [signInClicked, setSignInClicked] = useState(false);
+  const [userName, setUserName] = useState('');
+  const [password, setPassword] = useState('');
+  const [token, setToken] = useState({});
+
+  const loginUser = async (credentials) => {
+    try {
+      const response = await axios.post(
+        'http://localhost:8000/auth/users/tokens',
+        new URLSearchParams(credentials).toString(), 
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.log('An error occurred:', error.response.data);
+      throw error;
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    console.log(userName);
+    console.log(password);
+  
+    try {
+      const token = await loginUser({"username": userName, "password": password });
+      console.log("token:", token);
+      localStorage.setItem("token", token.access_token)
+      // console.log(localStorage.getItem("token"))
+
+      setToken(token);
+  
+      if (token) {
+        console.log('Logged in successfully!');
+        // redirect to StoryGenPage
+      } else {
+        console.log('Login failed.');
+      }
+    } catch (error) {
+      console.log('An error occurred:', error);
+    }
+  };
+  
 
   return (
     <Transition appear show={showSignInModal} as={Fragment}>
@@ -53,28 +98,25 @@ const SignInModal = ({
                   <h3 className="font-display text-2xl font-bold">Sign In</h3>
                 </div>
 
-                <div className="flex flex-col space-y-4 bg-gray-50 px-4 py-8 md:px-16">
-                  <button
-                    disabled={signInClicked}
-                    className={`${signInClicked
-                      ? "cursor-not-allowed border-gray-200 bg-gray-100"
-                      : "border border-gray-200 bg-white text-black hover:bg-gray-50"
-                      } flex h-10 w-full items-center justify-center space-x-3 rounded-md border text-sm shadow-sm transition-all duration-75 focus:outline-none`}
-                    onClick={() => {
-                      setSignInClicked(true);
-                      signIn("google");
-                    }}
-                  >
-                    {signInClicked ? (
-                      <LoadingDots color="#808080" />
-                    ) : (
-                      <>
-                        <Google className="h-5 w-5" />
-                        <p>Sign In with Google</p>
-                      </>
-                    )}
-                  </button>
-                </div>
+                <form onSubmit={(e) => handleSubmit(e)} className="bg-white">
+                  <input
+                    type="email"
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    placeholder="Email"
+                    required
+                  />
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Password"
+                    required
+                  />
+                  <button type="submit">Login</button>
+                </form>
+
+                
               </Dialog.Panel>
             </Transition.Child>
           </div>
@@ -87,7 +129,7 @@ const SignInModal = ({
 export function useSignInModal() {
   const [showSignInModal, setShowSignInModal] = useState(false);
 
-  const SignInModalCallback = useCallback(() => {
+const SignInModalCallback = useCallback(() => {
     return (
       <SignInModal
         showSignInModal={showSignInModal}

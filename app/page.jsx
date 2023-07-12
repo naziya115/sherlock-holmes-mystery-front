@@ -1,18 +1,24 @@
-'use client'
-import StoryGenPage from "@/components/home/StoryGenPage";
-import Landing from "@/components/home/landing";
-import { authOptions } from "@/lib/authOptions";
-import { getServerSession } from "next-auth/next";
+"use client"
+import StoryGenPage from '@/components/home/StoryGenPage';
+import Landing from '@/components/home/landing';
+import { useEffect, useState } from 'react';
+
+const Home = () => {
+  const [token, setToken] = useState('');
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem('token');
+    console.log(token)
+    setToken(storedToken);
+  }, []);
+
+  if (token) {
+    return <StoryGenPage />;
+  } else {
+    return <Landing />;
+  }
+};
+
+export default Home;
 
 
-export default async function Home() {
-  const session = await getServerSession(authOptions);
-
-  return (
-    session !== null ? (
-      <StoryGenPage />
-    ) : (
-      <Landing />
-    )
-  );
-}
