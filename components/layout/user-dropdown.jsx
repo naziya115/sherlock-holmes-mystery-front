@@ -3,15 +3,19 @@
 import { Menu, Transition } from '@headlessui/react';
 import { ArrowRightOnRectangleIcon, ChatBubbleBottomCenterIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid';
 import cx from 'classnames';
-import { signOut } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { Fragment } from "react";
 
-export default function UserDropdown({ session }) {
-  const { email, image } = session?.user || {};
+export default function UserDropdown({ token }) {
+  if(!token) return null;
 
-  if (!email) return null;
+  const mySignOut = () => {
+        if(typeof window !== "undefined") {
+          localStorage.removeItem("token")
+          window.location.href = '/'
+        }
+  }
 
   return (
     <div className="relative inline-block text-left">
@@ -20,8 +24,8 @@ export default function UserDropdown({ session }) {
           <Menu.Button className="flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
             <span className="sr-only">Open user menu</span>
             <Image
-              alt={email}
-              src={image || `https://avatars.dicebear.com/api/micah/${email}.svg`}
+              alt='hello'
+              src='/avatar.png'
               width={40}
               height={40}
               className="rounded-full"
@@ -42,7 +46,7 @@ export default function UserDropdown({ session }) {
               {({ active }) => (
                 <button
                   className={cx(active ? 'bg-gray-100' : '', 'relative flex w-full items-center justify-start space-x-2 rounded-md p-2 text-sm text-gray-700')}
-                  onClick={() => signOut()}
+                  onClick={() => mySignOut()}
                 >
                   <ArrowRightOnRectangleIcon className="h-4 w-4" />
                   <p className="text-sm">Sign out</p>

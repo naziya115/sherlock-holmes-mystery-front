@@ -21,7 +21,7 @@ const Stories = () => {
         method: 'GET',
         headers: {
           "accept": "application/json",
-          "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2NDllYTQ3NjgyZjYwZDc5NTc3MzFhYjYiLCJleHAiOjE2ODk2OTc0NTh9.mWksmWwzJZ8Ffu386atFnZDJ2KkKmHUOzuu03JkFAT8"
+          "Authorization": `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2NGFlMzExZGRkMzQ5NmM4NDYyZDU2M2IiLCJleHAiOjE2ODk4ODE4MTF9.78MPFuUWikAHKnovzVzj3L-3LWkgz-JMwqXIUuytRsQ`
         },
       });
 
@@ -45,6 +45,7 @@ const Stories = () => {
 
   return (
        <div className="flex flex-col items-center">
+        <h1>Hello world</h1>
     {
       stories.map((story) => (
         <Link href={`/stories/${story._id}`} key={story._id}>

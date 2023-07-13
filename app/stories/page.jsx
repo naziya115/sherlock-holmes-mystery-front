@@ -1,25 +1,15 @@
 'use client'
-import { redirect } from "next/navigation";
-import { useEffect, useState } from "react";
-import Stories from "./stories";
+import StoryGenPage from '@/components/home/StoryGenPage';
+import Landing from '@/components/home/landing';
+import NoSsr from "components/NoSsr";
+import Stories from './stories';
 
-export default async function Home() {
-  const [hasToken, setHasToken] = useState(true);
-  console.log(hasToken)
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('token');
-      setHasToken(Boolean(token));
-    }
-  },[]);
+export default function Home() {
+  // DONT TOUCH, NO ONE TOUCHES THIS PART OR I'LL KILL YOU!!!!
+  return <NoSsr>
+    {typeof window !== "undefined" && !localStorage.getItem("token") ? <Landing/> : <Stories/>}
+  </NoSsr>
 
-  return ( 
-    hasToken ? (
-      <Stories />
-    ) : (
-        redirect("/")
-    )
-  );
-  
 }
+
