@@ -4,11 +4,11 @@ import { useEffect, useState } from "react";
 import Balancer from "react-wrap-balancer";
 
 export default function Landing() {
-  const [showText, setShowText] = useState(false);
+  // const [showText, setShowText] = useState(false);
 
-  useEffect(() => {
-    setShowText(true);
-  }, []);
+  // useEffect(() => {
+  //   setShowText(true);
+  // }, []);
 
 
   return (

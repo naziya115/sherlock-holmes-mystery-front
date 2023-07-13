@@ -42,17 +42,12 @@ const SignInModal = ({
   
     try {
       const token = await loginUser({"username": userName, "password": password });
-      console.log("token:", token);
-
       localStorage.setItem("token", token.access_token)
-      
-      // console.log(localStorage.getItem("token"))
-
       setToken(token);
   
       if (token) {
         console.log('Logged in successfully!');
-        // redirect to StoryGenPage
+        window.location.reload()
       } else {
         console.log('Login failed.');
       }

@@ -1,4 +1,4 @@
-import Chat from "@/components/home/chat";
+import Chat from "./chat";
 
 const StoryGenPage = () => {
   return (
@@ -11,4 +11,4 @@ const StoryGenPage = () => {
   );
 }
 
-export default StoryGenPage
+export default StoryGenPage;

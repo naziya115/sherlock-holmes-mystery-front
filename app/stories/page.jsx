@@ -1,13 +1,21 @@
-import { authOptions } from "@/lib/authOptions";
-import { getServerSession, } from "next-auth/next";
+'use client'
 import { redirect } from "next/navigation";
+import { useEffect, useState } from "react";
 import Stories from "./stories";
 
 export default async function Home() {
-  const session = await getServerSession(authOptions);
+  const [hasToken, setHasToken] = useState(true);
+  console.log(hasToken)
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      setHasToken(Boolean(token));
+    }
+  },[]);
 
   return ( 
-    session !== null ? (
+    hasToken ? (
       <Stories />
     ) : (
         redirect("/")
