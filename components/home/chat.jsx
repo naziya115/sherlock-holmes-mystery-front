@@ -8,7 +8,7 @@ import { ChatLine, LoadingChatLine } from './chat-line'
 export const initialMessages = [
   {
     role: 'assistant',
-    content: "Hi, I'm Dr. Watson who is a writer and a close friend of Sherlock Holmes. Let's generate a story together.",
+    content: "Hi, I'm Dr. Watson who is a writer and a close friend of Sherlock Holmes. Let's generate a story together.\nWhere did the crime take place?",
   },
 ]
 
@@ -88,6 +88,8 @@ const useMessages = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null);
 
+  const [part, setParts] = useState("1");
+
   const sendMessage = async (newMessage) => {
     setLoading(true)
     setError(null)
@@ -98,7 +100,24 @@ const useMessages = () => {
     setMessages(newMessages)
     const last10messages = newMessages.slice(-10)
 
-    const response = await fetch('http://localhost:8000/stories/q1', {
+    let response = "";
+
+    if(part == "1"){
+      response = await fetch('http://localhost:8000/stories/q1', {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + localStorage.getItem('token')
+        },
+        body: JSON.stringify({
+          answer: newMessage,
+        }),
+    })
+    console.log("first part is generated " + localStorage.getItem('token'))
+    setParts("2")
+  }else if(part == "2"){
+     response = await fetch('http://localhost:8000/stories/q2', {
       method: 'POST',
       headers: {
         'accept': 'application/json',
@@ -106,9 +125,61 @@ const useMessages = () => {
         'Authorization': 'Bearer ' + localStorage.getItem('token')
       },
       body: JSON.stringify({
+        _id: localStorage.getItem("story_id"),
         answer: newMessage,
+        new_question: localStorage.getItem("next_question")
       }),
     })
+    console.log("second part is generated " + localStorage.getItem('token'))
+    setParts("3")
+  }else if(part == "3"){
+    response = await fetch('http://localhost:8000/stories/q3', {
+     method: 'POST',
+     headers: {
+       'accept': 'application/json',
+       'Content-Type': 'application/json',
+       'Authorization': 'Bearer ' + localStorage.getItem('token')
+     },
+     body: JSON.stringify({
+      _id: localStorage.getItem("story_id"),
+      answer: newMessage,
+      new_question: localStorage.getItem("next_question")
+     }),
+   })
+   console.log("third part is generated " + localStorage.getItem('token'))
+   setParts("4")
+ }else if(part == "4"){
+  response = await fetch('http://localhost:8000/stories/q4', {
+   method: 'POST',
+   headers: {
+     'accept': 'application/json',
+     'Content-Type': 'application/json',
+     'Authorization': 'Bearer ' + localStorage.getItem('token')
+   },
+   body: JSON.stringify({
+    _id: localStorage.getItem("story_id"),
+        answer: newMessage,
+        new_question: localStorage.getItem("next_question")
+   }),
+ })
+ console.log("fourth part is generated " + localStorage.getItem('token'))
+ setParts("5")
+}else{
+  response = await fetch('http://localhost:8000/stories/q1', {
+   method: 'POST',
+   headers: {
+     'accept': 'application/json',
+     'Content-Type': 'application/json',
+     'Authorization': 'Bearer ' + localStorage.getItem('token')
+   },
+   body: JSON.stringify({
+     answer: newMessage,
+   }),
+ })
+ console.log("first part is generated " + localStorage.getItem('token'))
+ setParts("1")
+}
+
 
   const data = response.body
   if (!data) {
@@ -116,8 +187,12 @@ const useMessages = () => {
   }
   const responseData = await response.json(); 
 
-  const { _id, next_question } = responseData; 
+  console.log("reseponse data: ", responseData)
+  const { _id, next_question } = responseData;
+  console.log("_id: ", _id) 
+  console.log("Next question: ", next_question)
   localStorage.setItem("story_id", _id)
+  localStorage.setItem("next_question", next_question)
 
 
   setMessages([

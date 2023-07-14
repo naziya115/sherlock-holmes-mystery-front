@@ -8,6 +8,8 @@ const fetchStory = async () => {
     return {}
   }
   if (localStorage.getItem("story_id") != null) {
+    console.log("story_id", localStorage.getItem("story_id"))
+    console.log("token", localStorage.getItem("token"))
     try {
       const response = await axios.get(`http://localhost:8000/stories/${localStorage.getItem("story_id")}`, {
         headers: {
@@ -50,13 +52,8 @@ const StoryGenPage = () => {
   };
 
   useEffect(() => {
-    // Fetch story initially
     fetchAndUpdateStory();
-
-    // Poll for updates every 5 seconds (adjust the interval as needed)
     const intervalId = setInterval(fetchAndUpdateStory, 5000);
-
-    // Clean up the interval when the component unmounts
     return () => clearInterval(intervalId);
   }, []);
 
