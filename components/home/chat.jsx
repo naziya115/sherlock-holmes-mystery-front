@@ -1,15 +1,10 @@
-'use client'
-
-
 import { throttle } from '@/lib/throttle'
 import { PaperAirplaneIcon } from '@heroicons/react/24/outline'
-import axios from 'axios'
 import cx from 'classnames'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import toast, { Toaster } from 'react-hot-toast'
 import { ChatLine, LoadingChatLine } from './chat-line'
 
-// default first message to display in UI (not necessary to define the prompt)
 export const initialMessages = [
   {
     role: 'assistant',
@@ -17,36 +12,14 @@ export const initialMessages = [
   },
 ]
 
-
-const InputMessage = async ({ input, setInput, sendMessage, loading }) => {
+const InputMessage = ({ input, setInput, sendMessage, loading }) => {
   const [isGeneratingQuestion, setIsGeneratingQuestion] = useState(false)
   const [question, setQuestion] = useState(null)
   const [questionError, setQuestionError] = useState(null)
   const inputRef = useRef(null)
 
-
   const shouldShowLoadingIcon = loading || isGeneratingQuestion
   const inputActive = input !== '' && !shouldShowLoadingIcon
-
-  const generateJeopardyQuestion = async () => {
-    setIsGeneratingQuestion(true)
-    setQuestionError(null)
-
-    try {
-      const res = await axios.get('/api/question')
-      if (!res.data) {
-        throw new Error('No question was found in the response.')
-      }
-      const question_data = res.data
-
-      setQuestion(question_data)
-      setInput(`The category is "${question_data.category}". ${question_data.question}`)
-    } catch (err) {
-      setQuestionError(err.message)
-    } finally {
-      setIsGeneratingQuestion(false)
-    }
-  }
 
   useEffect(() => {
     const input = inputRef?.current
@@ -64,19 +37,13 @@ const InputMessage = async ({ input, setInput, sendMessage, loading }) => {
 
   return (
     <div className="bottom-0 left-0 right-0 bg-gradient-to-b from-transparent via-white to-white flex flex-col items-center clear-both">
-      <button
-        className="mx-auto flex w-fit items-center gap-3 rounded border border-neutral-200 bg-white py-2 px-4 text-black text-sm hover:opacity-50 disabled:opacity-25"
-        onClick={generateJeopardyQuestion}
-        disabled={isGeneratingQuestion}
-      >
-      </button>
       <div className="mx-2 my-4 flex-1 w-full md:mx-4 md:mb-[52px] lg:max-w-2xl xl:max-w-3xl">
         <div className="relative mx-2 flex-1 flex-col rounded-md border-black/10 bg-white shadow-[0_0_10px_rgba(0,0,0,0.10)] sm:mx-4">
           <input
             ref={inputRef}
             aria-label="chat input"
             required
-            className="m-0 w-full border-0 bg-transparent p-0 py-3 pl-4 pr-12 text-black text-lg"
+            className="m-0 w-full border-0 bg-transparent p-0 py-3 pl-4 pr-12 text-black"
             placeholder="Type a message..."
             value={input}
             onKeyDown={(e) => {
@@ -121,7 +88,6 @@ const useMessages = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null);
 
-  // send message to API /api/chat endpoint
   const sendMessage = async (newMessage) => {
     setLoading(true)
     setError(null)
@@ -130,67 +96,46 @@ const useMessages = () => {
       { role: 'user', content: newMessage },
     ]
     setMessages(newMessages)
-    const last10messages = newMessages.slice(-10) // remember last 10 messages
+    const last10messages = newMessages.slice(-10)
 
-    const response = await fetch('/api/chat', {
+    const response = await fetch('http://localhost:8000/stories/q1', {
       method: 'POST',
       headers: {
+        'accept': 'application/json',
         'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + localStorage.getItem('token')
       },
       body: JSON.stringify({
-        messages: last10messages,
+        answer: newMessage,
       }),
     })
 
-    console.log('Edge function returned.')
+  const data = response.body
+  if (!data) {
+    return
+  }
+  const responseData = await response.json(); 
 
-    if (!response.ok) {
-      console.log(response)
-      setError(response.statusText)
-      setLoading(false)
-      return
-    }
+  const { _id, next_question } = responseData; 
+  localStorage.setItem("story_id", _id)
 
-    // This data is a ReadableStream
-    const data = response.body
-    if (!data) {
-      return
-    }
 
-    // This data is a ReadableStream
+  setMessages([
+    ...newMessages,
+    { role: 'assistant', content: next_question }, 
+  ]);
 
-    setIsMessageStreaming(true)
+  setLoading(false);
 
-    const reader = data.getReader()
-    const decoder = new TextDecoder()
-    let done = false
-
-    let lastMessage = ''
-
-    while (!done) {
-      const { value, done: doneReading } = await reader.read()
-      done = doneReading
-      const chunkValue = decoder.decode(value)
-
-      lastMessage = lastMessage + chunkValue
-
-      setMessages([
-        ...newMessages,
-        { role: 'assistant', content: lastMessage },
-      ])
-
-      setLoading(false)
-    }
-
-    setIsMessageStreaming(false)
+  setIsMessageStreaming(false)
   }
 
   return {
-    messages,
-    isMessageStreaming,
-    loading,
-    error,
-    sendMessage,
+  messages,
+  isMessageStreaming,
+  loading,
+  error,
+  sendMessage,
   }
 }
 
@@ -236,7 +181,7 @@ export default function Chat() {
     <div className="flex flex-col flex-1 w-full border-zinc-100 bg-white overflow-hidden y-full">
       <div
         ref={chatContainerRef}
-        className="flex-1 w-full relative max-h-[calc(100vh-4rem)] overflow-x-hidden overflow-y-scroll"
+        className="flex-1 w-full relative max-h-[calc(100vh-4rem)] overflow-x-hidden overflow-y-scroll "
         onScroll={handleScroll}
       >
         {messages.map(({ content, role }, index) => (
@@ -251,11 +196,11 @@ export default function Chat() {
         />
       </div>
       <InputMessage
-          input={input}
-          setInput={setInput}
-          sendMessage={sendMessage}
-          isLoading={loading || isMessageStreaming}
-        />
+        input={input}
+        setInput={setInput}
+        sendMessage={sendMessage}
+        loading={loading || isMessageStreaming}
+      />
       <Toaster />
     </div>
   )

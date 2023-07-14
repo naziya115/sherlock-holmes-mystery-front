@@ -1,14 +1,66 @@
+'use client'
+import axios from 'axios';
+import { useEffect, useState } from 'react';
 import Chat from "./chat";
 
+const fetchStory = async () => {
+  if (typeof window === "undefined") {
+    return {}
+  }
+  if (localStorage.getItem("story_id") != null) {
+    try {
+      const response = await axios.get(`http://localhost:8000/stories/${localStorage.getItem("story_id")}`, {
+        headers: {
+          "Authorization": "Bearer " + localStorage.getItem('token'),
+          "accept": 'application/json',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching story:", error);
+      return {};
+    }
+  } else {
+    const story = {
+      story: {
+        content: "Real-time story generation"
+      }
+    };
+    return story;
+  }
+};
+
 const StoryGenPage = () => {
-  return (
-    <>
-    <div className="flex flex-column w-full h-[90vh] overflow-auto">
-        <div className="flex inset-y-0 left-0 basis-1/2"><Chat/></div>
-        <div className="flex inset-y-0 right-0 basis-1/2 p-8 text-black text-lg antialiased">* real-time story generation *</div>
-    </div>
-   </>
-  );
+  const [storyInfo, setStoryInfo] = useState(<></>);
+
+  const fetchAndUpdateStory = async () => {
+    const story = await fetchStory();
+    if (story && story.story) {
+      setStoryInfo(
+        <>
+          <div className="flex flex-column w-full h-[90vh] overflow-auto">
+            <div className="flex inset-y-0 left-0 basis-1/2"><Chat /></div>
+            <div className="flex inset-y-0 right-0 basis-1/2 p-8 text-black text-lg antialiased">
+              {story.story.content}
+            </div>
+          </div>
+        </>
+      );
+    }
+  };
+
+  useEffect(() => {
+    // Fetch story initially
+    fetchAndUpdateStory();
+
+    // Poll for updates every 5 seconds (adjust the interval as needed)
+    const intervalId = setInterval(fetchAndUpdateStory, 5000);
+
+    // Clean up the interval when the component unmounts
+    return () => clearInterval(intervalId);
+  }, []);
+
+  return storyInfo;
 }
 
 export default StoryGenPage;
