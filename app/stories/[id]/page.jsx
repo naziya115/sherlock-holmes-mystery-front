@@ -2,12 +2,9 @@
 import axios from 'axios';
 import { useParams } from 'next/navigation';
 
-
 import { useEffect, useState } from 'react';
 
-
 const fetchStory = async (id) => {
-  console.log("in")
   if (typeof window === "undefined") {
     return {}
   }
@@ -17,10 +14,8 @@ const fetchStory = async (id) => {
       "accept": 'application/json',
     },
   });
-  console.log(response.data);
   return response.data;
 };
-
 
 const Story = () => {
   const params = useParams()
@@ -30,10 +25,11 @@ const Story = () => {
   useEffect(() => {
     async function fetchData() {
       const story = await fetchStory(id);
+      const updatedContent = story.story.content.replace(/\)/g, "");
       setStoryInfo(
         <div>
           <h1 className="text-2xl items-center text-center">{story.story.title}</h1>
-          <div className="p-16 w-[70%] mx-auto text-lg">{story.story.content}</div>
+          <div className="p-16 w-[70%] mx-auto text-lg">{updatedContent}</div>
         </div>
       )
     }

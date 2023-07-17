@@ -1,4 +1,3 @@
-// Import the necessary modules
 'use client'
 import axios from 'axios';
 import Link from 'next/link';
@@ -8,7 +7,6 @@ const Stories = () => {
   const [stories, setStories] = useState(null);
   const didFetchRef = useRef(false);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     if (!didFetchRef.current) {
       didFetchRef.current = true;
@@ -29,7 +27,6 @@ const Stories = () => {
       const stories_inp = res.data.stories;
       setStories(stories_inp);
       setLoading(false);
-      console.log('stories:', stories_inp);
     } catch (error) {
       console.error('Error fetching stories:', error);
       setLoading(false);
@@ -40,8 +37,13 @@ const Stories = () => {
     return <div>Loading...</div>;
   }
 
-  if (!stories) {
-    return <div>No stories found.</div>;
+  if (!stories || stories.length === 0) {
+    return (
+      <div className="flex flex-col items-center">
+        <img width={40} src="/no-stories.png" alt="No stories" />
+        <div>No stories found.</div>
+      </div>
+    );
   }
 
   return (

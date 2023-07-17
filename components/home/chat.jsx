@@ -114,7 +114,6 @@ const useMessages = () => {
           answer: newMessage,
         }),
     })
-    console.log("first part is generated " + localStorage.getItem('token'))
     setParts("2")
   }else if(part == "2"){
      response = await fetch('http://localhost:8000/stories/q2', {
@@ -130,7 +129,6 @@ const useMessages = () => {
         new_question: localStorage.getItem("next_question")
       }),
     })
-    console.log("second part is generated " + localStorage.getItem('token'))
     setParts("3")
   }else if(part == "3"){
     response = await fetch('http://localhost:8000/stories/q3', {
@@ -146,7 +144,6 @@ const useMessages = () => {
       new_question: localStorage.getItem("next_question")
      }),
    })
-   console.log("third part is generated " + localStorage.getItem('token'))
    setParts("4")
  }else if(part == "4"){
   response = await fetch('http://localhost:8000/stories/q4', {
@@ -162,7 +159,6 @@ const useMessages = () => {
         new_question: localStorage.getItem("next_question")
    }),
  })
- console.log("fourth part is generated " + localStorage.getItem('token'))
  setParts("5")
 }else{
   response = await fetch('http://localhost:8000/stories/q1', {
@@ -176,7 +172,6 @@ const useMessages = () => {
      answer: newMessage,
    }),
  })
- console.log("first part is generated " + localStorage.getItem('token'))
  setParts("1")
 }
 
@@ -187,10 +182,7 @@ const useMessages = () => {
   }
   const responseData = await response.json(); 
 
-  console.log("reseponse data: ", responseData)
   const { _id, next_question } = responseData;
-  console.log("_id: ", _id) 
-  console.log("Next question: ", next_question)
   localStorage.setItem("story_id", _id)
   localStorage.setItem("next_question", next_question)
 

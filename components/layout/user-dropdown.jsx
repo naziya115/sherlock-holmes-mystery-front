@@ -13,6 +13,8 @@ export default function UserDropdown({ token }) {
   const mySignOut = () => {
         if(typeof window !== "undefined") {
           localStorage.removeItem("token")
+          localStorage.removeItem("story_id")
+          localStorage.removeItem("next_question")
           window.location.href = '/'
         }
   }

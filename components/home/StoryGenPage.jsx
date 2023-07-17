@@ -1,7 +1,8 @@
+
 'use client'
 import axios from 'axios';
 import { useEffect, useState } from 'react';
-import Chat from "./chat";
+import Chat from './chat';
 
 const fetchStory = async () => {
   if (typeof window === "undefined") {
@@ -25,39 +26,84 @@ const fetchStory = async () => {
   } else {
     const story = {
       story: {
-        content: "Real-time story generation"
+        content: "* Real-time story generation (if it does't work, just imagine) *"
       }
     };
     return story;
   }
 };
 
-const StoryGenPage = () => {
-  const [storyInfo, setStoryInfo] = useState(<></>);
+function removeNumbersAndParentheses(text) {
+  const regex = /[0-9()]/g;
+  return text.replace(regex, '');
+}
 
-  const fetchAndUpdateStory = async () => {
-    const story = await fetchStory();
-    if (story && story.story) {
-      setStoryInfo(
-        <>
-          <div className="flex flex-column w-full h-[90vh] overflow-auto">
-            <div className="flex inset-y-0 left-0 basis-1/2"><Chat /></div>
-            <div className="flex inset-y-0 right-0 basis-1/2 p-8 text-black text-lg antialiased">
-              {story.story.content}
-            </div>
-          </div>
-        </>
-      );
-    }
-  };
+const StoryGenPage = () => {
+  const [storyInfo, setStoryInfo] = useState(null);
 
   useEffect(() => {
-    fetchAndUpdateStory();
+    localStorage.removeItem("story_id");
+    localStorage.removeItem("next_question");
+
+    const fetchAndUpdateStory = async () => {
+      const story = await fetchStory();
+      if (story && story.story) {
+        setStoryInfo(story.story.content);
+      }
+    };
+
     const intervalId = setInterval(fetchAndUpdateStory, 5000);
+
+    fetchAndUpdateStory();
+
     return () => clearInterval(intervalId);
   }, []);
 
-  return storyInfo;
-}
+  return (
+    <>
+    <div className="flex flex-column w-full h-[90vh] overflow-auto">
+      <div className="flex inset-y-0 left-0 basis-1/2"><Chat /></div>
+      <div className="flex inset-y-0 right-0 basis-1/2 p-8 text-black text-lg antialiased animate-typing pr-16 break-normal">
+      {storyInfo && (
+            <StreamText content={removeNumbersAndParentheses(storyInfo)} />
+          )}
+      </div>
+    </div>
+    </>
+  );
+};
+
+const StreamText = ({ content }) => {
+  const [displayedContent, setDisplayedContent] = useState('');
+  const [lastStreamedIndex, setLastStreamedIndex] = useState(0);
+
+  // * text-to-speech generation *
+
+  useEffect(() => {
+    let currentContent = '';
+
+    const displayStream = async () => {
+      for (let i = lastStreamedIndex; i <= content.length; i++) {
+        currentContent = content.slice(0, i);
+        setDisplayedContent(currentContent);
+        setLastStreamedIndex(i);
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      }
+    };
+ 
+    displayStream();
+  }, [content, lastStreamedIndex]);
+
+  return (
+    <span>
+      {displayedContent}
+      <span className="blink-cursor">|</span>
+    </span>
+  );
+};
+
+
+
+
 
 export default StoryGenPage;
