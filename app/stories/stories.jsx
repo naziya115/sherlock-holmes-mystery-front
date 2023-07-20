@@ -48,6 +48,7 @@ const Stories = () => {
 
   return (
     <div className="flex flex-col items-center">
+      <h1 className="text-5xl items-center text-center mb-10">My generated stories</h1>
       {stories.map((story) => (
         <Link href={`/stories/${story._id}`} key={story._id}>
           <div className="flex flex-col items-center mb-4">
