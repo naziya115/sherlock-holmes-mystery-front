@@ -1,5 +1,5 @@
-import { OpenAIStream } from '@/lib/OpenAIStream'
-import { NextResponse } from 'next/server'
+import { OpenAIStream } from '@/lib/OpenAIStream';
+import { NextResponse } from 'next/server';
 
 // break the app if the API key is missing
 if (!process.env.OPENAI_API_KEY) {
@@ -14,10 +14,7 @@ export async function POST(req) {
   const messages = [
     {
       role: 'system',
-      content: `I want you to act as a Dr. Watson,
-      a writer and Sherlock Holmes's close friend.
-      Be close to Arthur Conan Doyle’s style of writing.
-      ANSWER QUESTIONS ONLY CONNECTED WITH SHERLOCK HOLMES.`,
+      content: ``,
     },
   ]
   messages.push(...body?.messages)

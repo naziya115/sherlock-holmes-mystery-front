@@ -83,128 +83,94 @@ const InputMessage = ({ input, setInput, sendMessage, loading }) => {
 }
 
 const useMessages = () => {
-  const [messages, setMessages] = useState(initialMessages)
+  const [messages, setMessages] = useState(initialMessages);
   const [isMessageStreaming, setIsMessageStreaming] = useState(false);
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const [part, setParts] = useState("1");
 
   const sendMessage = async (newMessage) => {
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
+
     const newMessages = [
       ...messages,
       { role: 'user', content: newMessage },
-    ]
-    setMessages(newMessages)
-    const last10messages = newMessages.slice(-10)
+    ];
+    setMessages(newMessages);
 
-    let response = "";
+    try {
+      if (localStorage.getItem("story_id") == null) {
+        // Fetch the data from the server for the first time
+        const response = await fetch('http://localhost:8000/stories/settings', {
+          method: 'POST',
+          headers: {
+            'accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + localStorage.getItem('token')
+          },
+        });
 
-    if(part == "1"){
-      response = await fetch('http://localhost:8000/stories/q1', {
-        method: 'POST',
-        headers: {
-          'accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + localStorage.getItem('token')
-        },
-        body: JSON.stringify({
-          answer: newMessage,
-        }),
-    })
-    setParts("2")
-  }else if(part == "2"){
-     response = await fetch('http://localhost:8000/stories/q2', {
-      method: 'POST',
-      headers: {
-        'accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + localStorage.getItem('token')
-      },
-      body: JSON.stringify({
-        _id: localStorage.getItem("story_id"),
-        answer: newMessage,
-        new_question: localStorage.getItem("next_question")
-      }),
-    })
-    setParts("3")
-  }else if(part == "3"){
-    response = await fetch('http://localhost:8000/stories/q3', {
-     method: 'POST',
-     headers: {
-       'accept': 'application/json',
-       'Content-Type': 'application/json',
-       'Authorization': 'Bearer ' + localStorage.getItem('token')
-     },
-     body: JSON.stringify({
-      _id: localStorage.getItem("story_id"),
-      answer: newMessage,
-      new_question: localStorage.getItem("next_question")
-     }),
-   })
-   setParts("4")
- }else if(part == "4"){
-  response = await fetch('http://localhost:8000/stories/q4', {
-   method: 'POST',
-   headers: {
-     'accept': 'application/json',
-     'Content-Type': 'application/json',
-     'Authorization': 'Bearer ' + localStorage.getItem('token')
-   },
-   body: JSON.stringify({
-    _id: localStorage.getItem("story_id"),
-        answer: newMessage,
-        new_question: localStorage.getItem("next_question")
-   }),
- })
- setParts("5")
-}else{
-  response = await fetch('http://localhost:8000/stories/q1', {
-   method: 'POST',
-   headers: {
-     'accept': 'application/json',
-     'Content-Type': 'application/json',
-     'Authorization': 'Bearer ' + localStorage.getItem('token')
-   },
-   body: JSON.stringify({
-     answer: newMessage,
-   }),
- })
- setParts("1")
-}
+        // Check if the response is successful
+        if (!response.ok) {
+          throw new Error('Failed to fetch data');
+        }
 
+        // Parse the response data as JSON
+        const responseData = await response.json();
 
-  const data = response.body
-  if (!data) {
-    return
-  }
-  const responseData = await response.json(); 
+        const { _id } = responseData;
 
-  const { _id, next_question } = responseData;
-  localStorage.setItem("story_id", _id)
-  localStorage.setItem("next_question", next_question)
+        // Store the story_id in local storage
+        localStorage.setItem('story_id', _id);
+        setLoading(false); // Set loading to false after the first request
+      } else{
+        // Fetch the data from the server for subsequent messages
+        const response = await fetch('http://localhost:8000/stories/chat', {
+          method: 'POST',
+          headers: {
+            'accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + localStorage.getItem('token')
+          },
+          body: JSON.stringify({ message: newMessage}),
+        });
 
+        // Check if the response is successful
+        if (!response.ok) {
+          throw new Error('Failed to fetch data');
+        }
 
-  setMessages([
-    ...newMessages,
-    { role: 'assistant', content: next_question }, 
-  ]);
+        // Parse the response data as JSON
+        const responseData = await response.json();
 
-  setLoading(false);
+        const { sherlock_message } = responseData;
+        // console.log(sherlock_message);
 
-  setIsMessageStreaming(false)
-  }
+        setMessages([
+          ...newMessages,
+          { role: 'assistant', content: sherlock_message },
+        ]);
+
+        setLoading(false);
+        setIsMessageStreaming(false);
+      }
+    } catch (err) {
+      setError('Failed to fetch data');
+      setLoading(false);
+      setIsMessageStreaming(false);
+    }
+  };
 
   return {
-  messages,
-  isMessageStreaming,
-  loading,
-  error,
-  sendMessage,
-  }
-}
+    messages,
+    isMessageStreaming,
+    loading,
+    error,
+    sendMessage,
+  };
+};
+
 
 export default function Chat() {
   const [input, setInput] = useState('')
@@ -212,7 +178,6 @@ export default function Chat() {
   const messagesEndRef = useRef(null);
   const chatContainerRef = useRef(null);
   const { messages, isMessageStreaming, loading, error, sendMessage } = useMessages()
-
   const handleScroll = () => {
     if (chatContainerRef.current) {
       const { scrollTop, scrollHeight, clientHeight } =
