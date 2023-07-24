@@ -28,6 +28,7 @@
     "react-hot-toast": "^2.4.1",
     "react-router-dom": "^6.14.1",
     "react-wrap-balancer": "^0.3.0",
+    "socket.io-client": "^4.7.1",
     "use-sound": "^4.0.1"
   },
   "devDependencies": {

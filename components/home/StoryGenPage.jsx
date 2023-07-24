@@ -1,16 +1,11 @@
-
 'use client'
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import Chat from './chat';
 
+// update the real-time generation with the story content
 const fetchStory = async () => {
-  if (typeof window === "undefined") {
-    return {}
-  }
   if (localStorage.getItem("story_id") != null) {
-    console.log("story_id", localStorage.getItem("story_id"))
-    console.log("token", localStorage.getItem("token"))
     try {
       const response = await axios.get(`http://localhost:8000/stories/${localStorage.getItem("story_id")}`, {
         headers: {
@@ -18,7 +13,6 @@ const fetchStory = async () => {
           "accept": 'application/json',
         },
       });
-      console.log(response.data);
       return response.data;
     } catch (error) {
       console.error("Error fetching story:", error);
@@ -34,6 +28,18 @@ const fetchStory = async () => {
   }
 };
 
+  // display only the latest part of the story
+  function getSubstringAfterLastDollar(inputString) {
+    const lastIndex = inputString.lastIndexOf("$");
+
+    if (lastIndex !== -1) {
+      return inputString.slice(lastIndex + 1);
+    } else {
+      return inputString;
+    }
+  }
+
+// remove unnecessary symbols
 function removeNumbersAndParentheses(text) {
   const regex = /[0-9()]/g;
   return text.replace(regex, '');
@@ -43,13 +49,15 @@ const StoryGenPage = () => {
   const [storyInfo, setStoryInfo] = useState(null);
 
   useEffect(() => {
-    // localStorage.removeItem("story_id");
-    // localStorage.removeItem("next_question");
+    // start a new story after the page is reloaded
+    localStorage.removeItem("story_id");
+    localStorage.removeItem("next_question");
 
     const fetchAndUpdateStory = async () => {
       const story = await fetchStory();
       if (story && story.story) {
-        setStoryInfo(story.story.content);
+        const storyContent = getSubstringAfterLastDollar(story.story.content);
+        setStoryInfo(storyContent);
       }
     };
 
@@ -61,9 +69,10 @@ const StoryGenPage = () => {
   }, []);
 
   return (
+    // display story
     <>
     <div className="flex flex-column w-full h-[90vh] overflow-auto">
-      <div className="flex inset-y-0 left-0 basis-2/5"><Chat /></div>
+      <div className="flex inset-y-0 left-0 basis-2/5"><Chat/></div>
       <div className="flex inset-y-0 right-0 basis-3/5 p-8 text-black text-lg antialiased animate-typing pr-16 break-normal">
       {storyInfo && (
             <StreamText content={removeNumbersAndParentheses(storyInfo)} />
@@ -74,37 +83,54 @@ const StoryGenPage = () => {
   );
 };
 
+// stream story content
 const StreamText = ({ content }) => {
   const [displayedContent, setDisplayedContent] = useState('');
   const [lastStreamedIndex, setLastStreamedIndex] = useState(0);
-
-  // * text-to-speech generation *
+  const [showCursor, setShowCursor] = useState(true);
 
   useEffect(() => {
     let currentContent = '';
 
     const displayStream = async () => {
-      for (let i = lastStreamedIndex; i <= content.length; i++) {
-        currentContent = content.slice(0, i);
+      // divide story content into chunks to make steaming more efficient
+      const chunkSize = 50; 
+      const totalChunks = Math.ceil(content.length / chunkSize);
+
+      for (let chunk = lastStreamedIndex; chunk < totalChunks; chunk++) {
+        const startIndex = chunk * chunkSize;
+        const endIndex = Math.min(startIndex + chunkSize, content.length);
+        currentContent = content.slice(0, endIndex).replace(/\n\n/g, '<br />');
         setDisplayedContent(currentContent);
-        setLastStreamedIndex(i);
-        await new Promise((resolve) => setTimeout(resolve, 50));
+        setLastStreamedIndex(chunk);
+
+        if (endIndex === content.length) {
+          setShowCursor(true);
+          break;
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 100));
       }
     };
- 
+
     displayStream();
   }, [content, lastStreamedIndex]);
 
+  // move cursor as the story content is streamed
+  useEffect(() => {
+    const cursorInterval = setInterval(() => {
+      setShowCursor((prevShowCursor) => !prevShowCursor);
+    }, 500);
+
+    return () => clearInterval(cursorInterval);
+  }, []);
+
   return (
     <span>
-      {displayedContent}
-      <span className="blink-cursor">|</span>
+      <div style={{ display: 'inline' }} dangerouslySetInnerHTML={{ __html: displayedContent }} />
+      {showCursor && <span style={{ display: 'inline', opacity: 0.7 }}>|</span>}
     </span>
   );
 };
-
-
-
-
 
 export default StoryGenPage;
