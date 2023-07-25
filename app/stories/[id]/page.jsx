@@ -25,16 +25,16 @@ const Story = () => {
   useEffect(() => {
     async function fetchData() {
       const story = await fetchStory(id);
-      const updatedContent = story.story.content.replace(/\)/g, "");
+      const updatedContent = story.story.content.replaceAll("$", "<br><br>");
       setStoryInfo(
         <div>
-          <h1 className="text-2xl items-center text-center">{story.story.title}</h1>
-          <div className="p-16 w-[70%] mx-auto text-lg">{updatedContent}</div>
+          <h1 className="text-5xl items-center text-center">{story.story.title}</h1>
+          <div className="p-16 w-[70%] mx-auto text-2xl" dangerouslySetInnerHTML={{ __html: updatedContent }}></div>
         </div>
-      )
+      );
     }
-    fetchData()
-  }, [])
+    fetchData();
+  }, []);
   return storyInfo
 }
 

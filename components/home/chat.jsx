@@ -12,6 +12,25 @@ import { ChatLine, LoadingChatLine } from './chat-line'
     },
   ]
 
+  const Request = async ({ route, sherlock_message = "", type = "small_talk", method = "POST" }) => {
+    const story_id = localStorage.getItem("story_id");
+    const token = localStorage.getItem('token');
+    const requestOptions = {
+      method: method,
+      headers: {
+        'accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+    };
+    if (method === "POST") {
+      requestOptions.body = JSON.stringify({ story_id: story_id, sherlock_message: sherlock_message, type: type });
+    }
+    const response = await fetch('http://localhost:8000/stories/' + route, requestOptions);
+    return response;
+  }
+  
+
   const InputMessage = ({ input, setInput, sendMessage, loading, setSherlockSolution}) => {
     const inputRef = useRef(null)
     const [isStoryStageButton, setStoryStageButtonVisible] = useState(true);
@@ -20,73 +39,58 @@ import { ChatLine, LoadingChatLine } from './chat-line'
     const [mainSuspects, setMainSuspects] = useState([]);
     const [storyStageButtonContent, setStoryStageButtonContent] = useState('Set the Setting');
     const[finishedStory, setFinishedStory] = useState(false);
-
     const shouldShowLoadingIcon = loading 
     const inputActive = input !== '' && !shouldShowLoadingIcon
     const storyId = localStorage.getItem('story_id');
 
     useEffect(() => {
-      if(storyId == null){
+      if (storyId == null) {
         setStoryStageButtonContent("Set the Setting");
         setInputMessageVisible(false);
+      } else {
+        if (finishedStory === false) {
+          setStoryStageButtonVisible(true);
+          setStoryStageButtonContent("Start the Case");
+          setInputMessageVisible(true);
+        } else {
+          setStoryStageButtonVisible(true);
+          setStoryStageButtonContent("Finish the Case");
+        }
       }
-      else if (storyId != null && finishedStory == false) {
-        setStoryStageButtonVisible(true);
-        setStoryStageButtonContent("Start the Case");
-        setInputMessageVisible(true);
-      }else if(finishedStory == true && storyId != null){
-        setStoryStageButtonVisible(true);
-        setStoryStageButtonContent("Finish the Case");
-      }
-    }, [storyId, finishedStory == true])
-
+    }, [storyId, finishedStory]);
+    
     const StoryStage = () => {
       const storyId = localStorage.getItem('story_id');
-      if(storyId == null){
+      if (storyId == null) {
         SetStory();
         setStoryStageButtonVisible(false);
-      }else if(finishedStory == true){
+      } else if (finishedStory === true) {
         setInputMessageVisible(false);
         FinishStory();
         setStoryStageButtonVisible(false);
-      }else{
+      } else {
         StartCase();
         sendMessage("Who is the criminal", true);
         setInputMessageVisible(false);
         setStoryStageButtonVisible(false);
       }
-    }
-    
+    };
+  
     // finish the story
     const FinishStory = async() => {
       try {
-        const response = await fetch('http://localhost:8000/stories/conclusion', {
-          method: 'POST',
-          headers: {
-            'accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + localStorage.getItem('token'),
-          },
-          body: JSON.stringify({ story_id: localStorage.getItem('story_id')}),
-        });
-        if (!response.ok) {
+        const response = await Request({ route: "conclusion"});
+        if (!response.ok)
           throw new Error('Failed to fetch data');
-        }
-      } catch (error) {
+      }catch (error) {
+        console.log(error);
       }
     };
 
     // set the setting of the story
     const SetStory = async () => {
       try {
-        const response = await fetch('http://localhost:8000/stories/setting', {
-          method: 'POST',
-          headers: {
-            'accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + localStorage.getItem('token'),
-          },
-        });
+        const response = await Request({ route: "setting" });
         if (!response.ok) {
           throw new Error('Failed to fetch data');
         }
@@ -94,28 +98,19 @@ import { ChatLine, LoadingChatLine } from './chat-line'
         const { _id } = responseData;
         localStorage.setItem('story_id', _id);
       } catch (error) {
+        console.log(error);
       }
     };
 
     // start the case
     const StartCase = async () => {
       try {
-        const response = await fetch('http://localhost:8000/stories/case_intro', {
-          method: 'POST',
-          headers: {
-            'accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + localStorage.getItem('token')
-          },
-          body: JSON.stringify({ story_id: localStorage.getItem('story_id')}),
-        });
-    
+        const response = await Request({ route: "case_intro" });
         if (!response.ok) {
           throw new Error('Failed to fetch story content');
         }
       } catch (err) {
         console.error('Failed to fetch story content', err);
-        toast.error('Failed to fetch story content');
       }
       // get the main suspects, right after the victim's story is generated
       getMainSuspects();
@@ -123,22 +118,13 @@ import { ChatLine, LoadingChatLine } from './chat-line'
 
     const getMainSuspects = async() => {
       try {
-        const response = await fetch('http://localhost:8000/stories/main_suspects', {
-          method: 'GET',
-          headers: {
-            'accept': 'application/json',
-            'Authorization': 'Bearer ' + localStorage.getItem('token')
-          },
-        });
-    
+        const response = await Request({ route: "main_suspects", method: "GET"});
         if (!response.ok) {
           throw new Error('Failed to fetch story content');
         }
-    
         const responseData = await response.json();
         const { sherlock_message } = responseData;
         const suspects = sherlock_message.split('\n');
-        
         setMainSuspects(suspects);
         setMainSuspectsVisible(true);
         setStoryStageButtonVisible(false);
@@ -146,7 +132,6 @@ import { ChatLine, LoadingChatLine } from './chat-line'
         
       } catch (err) {
         console.error('Failed to fetch story content', err);
-        toast.error('Failed to fetch story content');
       }
     }
     
@@ -161,50 +146,30 @@ import { ChatLine, LoadingChatLine } from './chat-line'
     const handleMainSuspectsButton = (name) => {
       // interaction when the user chooses the criminal
       setMainSuspectsVisible(false); 
-      sendMessage(name)
+      sendMessage(name, false, false)
       getInvestigation();
     };
 
     const getInvestigation = async() =>{
       try {
-        const response = await fetch('http://localhost:8000/stories/investigation', {
-          method: 'POST',
-          headers: {
-            'accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + localStorage.getItem('token')
-          },
-          body: JSON.stringify({ story_id: localStorage.getItem('story_id')}),
-        });
-    
+        const response = await Request({ route: "investigation" });
         if (!response.ok) {
           throw new Error('Failed to fetch story content');
         }
         getSherlockSolution();
       } catch (err) {
         console.error('Failed to fetch story content', err);
-        toast.error('Failed to fetch story content');
       }
     }
 
     const getSherlockSolution = async() => {
       try {
-        const response = await fetch('http://localhost:8000/stories/solution', {
-          method: 'POST',
-          headers: {
-            'accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + localStorage.getItem('token')
-          },
-          body: JSON.stringify({ story_id: localStorage.getItem('story_id')}),
-        });
+        const response = await Request({ route: "solution" });
         if (!response.ok) {
           throw new Error('Failed to fetch data');
         }
         const responseData = await response.json();
-
         const { sherlock_message } = responseData;
-        
         setSherlockSolution(sherlock_message)
         setFinishedStory(true);
       } catch (err) {
@@ -294,7 +259,7 @@ import { ChatLine, LoadingChatLine } from './chat-line'
       const [error, setError] = useState(null);
       const [solutionChat, setSolutionChat] = useState(false);
 
-      const sendMessage = async (newMessage, isAssistant=false) => {
+      const sendMessage = async (newMessage, isAssistant=false, answerRequired=true) => {
         setLoading(true);
         setError(null);
         if (isAssistant){
@@ -302,78 +267,30 @@ import { ChatLine, LoadingChatLine } from './chat-line'
             ...messages,
             { role: 'assistant', content: newMessage },
           ];
-  
           setMessages(newMessages);
           setSolutionChat(true);
-        }else{
+        }else if(!answerRequired){
           const newMessages = [
             ...messages,
             { role: 'user', content: newMessage },
           ];
           setMessages(newMessages);
-        
-
-        try {
-          const storyId = localStorage.getItem("story_id");
-          if (storyId != null && solutionChat == false) {
-            console.log("small talk")
-            const response = await fetch('http://localhost:8000/stories/chat', {
-              method: 'POST',
-              headers: {
-                'accept': 'application/json',
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + localStorage.getItem('token')
-              },
-              body: JSON.stringify({ sherlock_message: newMessage, type: "small_talk"}),
-            });
-            if (!response.ok) {
-              throw new Error('Failed to fetch data');
-            }
-            const responseData = await response.json();
-
-            const { sherlock_message } = responseData;
-
-            setMessages([
-              ...newMessages,
-              { role: 'assistant', content: sherlock_message },
-            ]);
-
-            setLoading(false);
-            setIsMessageStreaming(false);
-            
-          }
-          else if(storyId != null && solutionChat == true){
-            console.log("explanation chat")
-            const response = await fetch('http://localhost:8000/stories/chat', {
-              method: 'POST',
-              headers: {
-                'accept': 'application/json',
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + localStorage.getItem('token')
-              },
-              body: JSON.stringify({ sherlock_message: newMessage, type: "case_explanation"}),
-            });
-            if (!response.ok) {
-              throw new Error('Failed to fetch data');
-            }
-            const responseData = await response.json();
-
-            const { sherlock_message } = responseData;
-
-            setMessages([
-              ...newMessages,
-              { role: 'assistant', content: sherlock_message },
-            ]);
-
-            setLoading(false);
-            setIsMessageStreaming(false);
-          }
-        } catch (err) {
-          setError('Failed to fetch data');
+        }
+        else{
+          const newMessages = [
+            ...messages,
+            { role: 'user', content: newMessage },
+          ];
+          setMessages(newMessages);
+          // to fetch the message of the user and get response
+          const answer = await fetchChatData(newMessage, solutionChat);
+          setMessages([
+            ...newMessages,
+            { role: 'assistant', content: answer },
+          ]);
           setLoading(false);
           setIsMessageStreaming(false);
-        }
-      };
+        };
     }
       return {
         messages,
@@ -384,6 +301,25 @@ import { ChatLine, LoadingChatLine } from './chat-line'
       };
     };
 
+    const fetchChatData = async (newMessage, solutionChat) => {
+      try {
+        const storyId = localStorage.getItem("story_id");
+        if (storyId != null) {
+          const type = solutionChat ? "case_explanation" : "small_talk";
+          const response = await Request({ route: "chat", sherlock_message: newMessage, type: type });
+          if (!response.ok) {
+            throw new Error('Failed to fetch data');
+          }
+          const responseData = await response.json();
+          const { sherlock_message } = responseData;
+          return sherlock_message;
+        }
+        
+      } catch (err) {
+        console.log('Failed to fetch data');
+      }
+    };
+    
 
   export default function Chat() {
     const [input, setInput] = useState('')

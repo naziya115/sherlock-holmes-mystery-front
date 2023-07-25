@@ -1,4 +1,4 @@
-import { CommandLineIcon, UserIcon } from '@heroicons/react/24/outline'
+import { BookOpenIcon, UserIcon } from '@heroicons/react/24/outline'
 
 // loading placeholder animation for the chat line
 export const LoadingChatLine = () => (
@@ -9,7 +9,7 @@ export const LoadingChatLine = () => (
       className="relative m-auto flex p-4 text-base md:max-w-2xl gap-2 md:gap-6 md:py-6 lg:max-w-2xl lg:px-0 xl:max-w-3xl"
     >
       <div className="min-w-[30px]">
-        <CommandLineIcon />
+        <BookOpenIcon />
       </div>
       <span className="animate-pulse cursor-default mt-1">▍</span>
     </div>
@@ -46,7 +46,7 @@ export function ChatLine({ role = 'assistant', content, isStreaming }) {
         <div className="min-w-[30px]">
           {role === 'assistant'
             ? (
-              <CommandLineIcon />
+              <BookOpenIcon />
             )
             : (
               <UserIcon />
