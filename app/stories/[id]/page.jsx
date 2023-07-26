@@ -8,7 +8,7 @@ const fetchStory = async (id) => {
   if (typeof window === "undefined") {
     return {}
   }
-  const response = await axios.get(`http://localhost:8000/stories/${id}`, {
+  const response = await axios.get(`https://fastapi-lgg5.onrender.com/stories/${id}`, {
     headers: {
       "Authorization": "Bearer " + localStorage.getItem('token'),
       "accept": 'application/json',

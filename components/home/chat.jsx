@@ -26,7 +26,7 @@ import { ChatLine, LoadingChatLine } from './chat-line'
     if (method === "POST") {
       requestOptions.body = JSON.stringify({ story_id: story_id, sherlock_message: sherlock_message, type: type });
     }
-    const response = await fetch('http://localhost:8000/stories/' + route, requestOptions);
+    const response = await fetch('https://fastapi-lgg5.onrender.com/stories/' + route, requestOptions);
     return response;
   }
   

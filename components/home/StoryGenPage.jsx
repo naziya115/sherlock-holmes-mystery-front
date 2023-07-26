@@ -7,7 +7,7 @@ import Chat from './chat';
 const fetchStory = async () => {
   if (localStorage.getItem("story_id") != null) {
     try {
-      const response = await axios.get(`http://localhost:8000/stories/${localStorage.getItem("story_id")}`, {
+      const response = await axios.get(`https://fastapi-lgg5.onrender.com/stories/${localStorage.getItem("story_id")}`, {
         headers: {
           "Authorization": "Bearer " + localStorage.getItem('token'),
           "accept": 'application/json',

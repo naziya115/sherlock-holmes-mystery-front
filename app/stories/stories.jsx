@@ -16,7 +16,7 @@ const Stories = () => {
 
   const fetchStories = async () => {
     try {
-      const res = await axios.get('http://localhost:8000/stories/', {
+      const res = await axios.get('https://fastapi-lgg5.onrender.com/stories/', {
         method: 'GET',
         headers: {
           accept: 'application/json',
