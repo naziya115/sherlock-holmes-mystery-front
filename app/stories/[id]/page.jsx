@@ -28,8 +28,8 @@ const Story = () => {
       const updatedContent = story.story.content.replaceAll("$", "<br><br>");
       setStoryInfo(
         <div>
-          <h1 className="text-5xl items-center text-center">{story.story.title}</h1>
-          <div className="p-16 w-[70%] mx-auto text-2xl" dangerouslySetInnerHTML={{ __html: updatedContent }}></div>
+          <h1 className="text-3xl items-center text-center">{story.story.title}</h1>
+          <div className="p-16 w-[70%] mx-auto text-xl" dangerouslySetInnerHTML={{ __html: updatedContent }}></div>
         </div>
       );
     }
