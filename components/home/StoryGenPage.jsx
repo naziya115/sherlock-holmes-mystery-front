@@ -73,7 +73,7 @@ const StoryGenPage = () => {
     <>
     <div className="flex flex-column w-full h-[90vh] overflow-auto">
       <div className="flex inset-y-0 left-0 basis-2/5"><Chat/></div>
-      <div className="flex inset-y-0 right-0 basis-3/5 p-8 text-black text-lg antialiased animate-typing pr-16 break-normal">
+      <div className="flex inset-y-0 right-0 basis-3/5 p-8 text-black text-base antialiased animate-typing pr-16 break-normal">
       {storyInfo && (
             <StreamText content={removeNumbersAndParentheses(storyInfo)} />
           )}
@@ -100,6 +100,7 @@ const StreamText = ({ content }) => {
       for (let chunk = lastStreamedIndex; chunk < totalChunks; chunk++) {
         const startIndex = chunk * chunkSize;
         const endIndex = Math.min(startIndex + chunkSize, content.length);
+        // evil
         currentContent = content.slice(0, endIndex).replace(/\n\n/g, '<br />');
         setDisplayedContent(currentContent);
         setLastStreamedIndex(chunk);

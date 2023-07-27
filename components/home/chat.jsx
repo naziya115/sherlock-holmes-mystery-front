@@ -213,7 +213,7 @@ import { ChatLine, LoadingChatLine } from './chat-line'
               ref={inputRef}
               aria-label="chat input"
               required
-              className="m-0 w-full border-0 bg-transparent p-0 py-3 pl-4 pr-12 text-black"
+              className="m-0 w-full border-0 text-sm bg-transparent p-0 py-3 pl-4 pr-12 text-black"
               placeholder="Type a message..."
               value={input}
               onKeyDown={(e) => {
