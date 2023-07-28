@@ -3,7 +3,7 @@ import { BookOpenIcon, UserIcon } from '@heroicons/react/24/outline'
 // loading placeholder animation for the chat line
 export const LoadingChatLine = () => (
   <div
-    className="border-b border-black/10 bg-gray-50 text-gray-800"
+    className="border-b border-black/10 bg-[#F8F8F8] text-black"
   >
     <div
       className="relative m-auto flex p-4 text-base md:max-w-2xl gap-2 md:gap-6 md:py-6 lg:max-w-2xl lg:px-0 xl:max-w-3xl"
@@ -36,8 +36,8 @@ export function ChatLine({ role = 'assistant', content, isStreaming }) {
     <div
       className={
         role === 'assistant'
-          ? "border-b border-black/10 bg-gray-50 text-gray-800"
-          : "border-b border-black/10 bg-white text-gray-800"
+          ? "border-b border-black/10 bg-[#F8F8F8] text-black"
+          : "border-b border-black/10 bg-[#F8F8F8] text-black"
       }
     >
       <div
