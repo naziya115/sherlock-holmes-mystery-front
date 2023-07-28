@@ -101,7 +101,7 @@ const StoryGenPage = () => {
         enhance your browsing experience. For the best user experience, 
         we kindly request accessing this website from a laptop or computer. 
         Thank you for your understanding and patience as we work towards improving our mobile compatibility. 
-        If you have any urgent queries or concerns, feel free to contact us through the provided alternative channels. </div>
+        </div>
       // <div className="flex flex-column w-full h-[90vh] overflow-auto">
       //   <div className="flex inset-y-0 right-0 text-black text-base antialiased p-4 break-normal">
       //     {storyInfo}
