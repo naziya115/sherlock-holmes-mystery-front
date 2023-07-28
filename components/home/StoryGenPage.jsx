@@ -69,7 +69,7 @@ const StoryGenPage = () => {
     return () => clearInterval(intervalId);
   }, []);
 
- // design for smaller screens
+  // check for smaller screens
   useEffect(() => {
     const mediaQuery = window.matchMedia('(max-width: 768px)'); // Adjust the max-width to the desired breakpoint for phones
     setIsPhone(mediaQuery.matches);
@@ -95,13 +95,20 @@ const StoryGenPage = () => {
         </div>
       </div>
     ) : (
-    <div className="flex flex-column w-full h-[90vh] overflow-auto" style={{ flexDirection: 'column' }}>
-      <div className="inset-y-0 left-0">
-        <Chat />
-      </div>
-    </div>
+      <div className='p-8'>
+        We apologize for any inconvenience caused.
+        Our mobile version is currently undergoing development to 
+        enhance your browsing experience. For the best user experience, 
+        we kindly request accessing this website from a laptop or computer. 
+        Thank you for your understanding and patience as we work towards improving our mobile compatibility. 
+        If you have any urgent queries or concerns, feel free to contact us through the provided alternative channels. </div>
+      // <div className="flex flex-column w-full h-[90vh] overflow-auto">
+      //   <div className="flex inset-y-0 right-0 text-black text-base antialiased p-4 break-normal">
+      //     {storyInfo}
+      //   </div>
+      //   <div className="flex inset-y-0 left-0"><Chat/></div>
+      // </div>
     )}
-
     </>
   );
 };
