@@ -47,6 +47,7 @@ function removeNumbersAndParentheses(text) {
 
 const StoryGenPage = () => {
   const [storyInfo, setStoryInfo] = useState(null);
+  const [isPhone, setIsPhone] = useState(false);
 
   useEffect(() => {
     // start a new story after the page is reloaded
@@ -68,17 +69,39 @@ const StoryGenPage = () => {
     return () => clearInterval(intervalId);
   }, []);
 
+ // design for smaller screens
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 768px)'); // Adjust the max-width to the desired breakpoint for phones
+    setIsPhone(mediaQuery.matches);
+
+    const handleResize = (event) => {
+      setIsPhone(event.matches);
+    };
+
+    mediaQuery.addListener(handleResize);
+    return () => mediaQuery.removeListener(handleResize);
+  }, []);
+
   return (
     // display story
     <>
-    <div className="flex flex-column w-full h-[90vh] overflow-auto">
-      <div className="flex inset-y-0 left-0 basis-2/5"><Chat/></div>
-      <div className="flex inset-y-0 right-0 basis-3/5 p-8 text-black text-base antialiased animate-typing pr-16 break-normal">
-      {storyInfo && (
+    {!isPhone ? (
+      <div className="flex flex-column w-full h-[90vh] overflow-auto">
+        <div className="flex inset-y-0 left-0 basis-2/5"><Chat/></div>
+        <div className="flex inset-y-0 right-0 basis-3/5 p-8 text-black text-base antialiased animate-typing pr-16 break-normal">
+          {storyInfo && (
             <StreamText content={removeNumbersAndParentheses(storyInfo)} />
           )}
+        </div>
+      </div>
+    ) : (
+    <div className="flex flex-column w-full h-[90vh] overflow-auto" style={{ flexDirection: 'column' }}>
+      <div className="inset-y-0 left-0">
+        <Chat />
       </div>
     </div>
+    )}
+
     </>
   );
 };
