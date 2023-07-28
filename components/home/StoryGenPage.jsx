@@ -48,6 +48,13 @@ function removeNumbersAndParentheses(text) {
 const StoryGenPage = () => {
   const [storyInfo, setStoryInfo] = useState(null);
   const [isPhone, setIsPhone] = useState(false);
+  const [activeTab, setActiveTab] = useState("Chat"); 
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+  };
+
+
 
   useEffect(() => {
     // start a new story after the page is reloaded
@@ -95,19 +102,16 @@ const StoryGenPage = () => {
         </div>
       </div>
     ) : (
-      <div className='p-8'>
-        We apologize for any inconvenience caused.
-        Our mobile version is currently undergoing development to 
-        enhance your browsing experience. For the best user experience, 
-        we kindly request accessing this website from a laptop or computer. 
-        Thank you for your understanding and patience as we work towards improving our mobile compatibility. 
+      <>
+        <div className="flex flex-col h-screen">
+          <div className='overflow-auto h-1/2'><Chat /></div>
+          <div className='overflow-auto h-1/2 bg-white p-4'>
+            {storyInfo && (
+              <StreamText content={removeNumbersAndParentheses(storyInfo)} />
+            )}
+          </div>
         </div>
-      // <div className="flex flex-column w-full h-[90vh] overflow-auto">
-      //   <div className="flex inset-y-0 right-0 text-black text-base antialiased p-4 break-normal">
-      //     {storyInfo}
-      //   </div>
-      //   <div className="flex inset-y-0 left-0"><Chat/></div>
-      // </div>
+      </>
     )}
     </>
   );

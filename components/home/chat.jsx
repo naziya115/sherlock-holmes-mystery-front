@@ -370,7 +370,7 @@ import { ChatLine, LoadingChatLine } from './chat-line'
 
 
     return (
-      <div className="flex flex-col flex-1 w-full border-zinc-100 bg-white overflow-hidden y-full">
+      <div className="flex flex-col flex-1 w-full border-zinc-100 bg-white overflow-hidden h-[1/2]">
         <div
           ref={chatContainerRef}
           className="flex-1 w-full relative max-h-[calc(100vh-4rem)] overflow-x-hidden overflow-y-scroll "
@@ -381,7 +381,7 @@ import { ChatLine, LoadingChatLine } from './chat-line'
           ))}
           {loading && <LoadingChatLine />}
           <div
-            className="h-[54vh]"
+            className="h-[20vh]"
             ref={messagesEndRef}
           />
         </div>
