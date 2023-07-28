@@ -14,3 +14,20 @@
     opacity: 0;
   }
 }
+/* CSS for mobile devices */
+@media (max-width: 767px) {
+  /* Set flex-direction to column for mobile */
+  .flex.flex-column {
+    flex-direction: column;
+  }
+
+  /* Adjust the order of the elements for mobile */
+  .inset-y-0.left-0 {
+    order: 2;
+  }
+
+  .inset-y-0.right-0 {
+    order: 1;
+  }
+  
+}

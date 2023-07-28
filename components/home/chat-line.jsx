@@ -8,7 +8,7 @@ export const LoadingChatLine = () => (
     <div
       className="relative m-auto flex p-4 text-base md:max-w-2xl gap-2 md:gap-6 md:py-6 lg:max-w-2xl lg:px-0 xl:max-w-3xl"
     >
-      <div className="min-w-[30px] ml-4">
+      <div className="min-w-[30px] lg:ml-4">
         <BookOpenIcon />
       </div>
       <span className="animate-pulse cursor-default mt-1">▍</span>
@@ -43,7 +43,7 @@ export function ChatLine({ role = 'assistant', content, isStreaming }) {
       <div
         className="relative m-auto flex p-4 text-base md:max-w-2xl gap-2 md:gap-6 md:py-6 lg:max-w-2xl lg:px-0 xl:max-w-3xl"
       >
-        <div className="min-w-[30px] ml-4">
+        <div className="min-w-[30px] lg:ml-4">
           {role === 'assistant'
             ? (
               <BookOpenIcon />

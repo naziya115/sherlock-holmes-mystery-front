@@ -381,7 +381,7 @@ import { ChatLine, LoadingChatLine } from './chat-line'
           ))}
           {loading && <LoadingChatLine />}
           <div
-            className="h-[54vh] bg-white"
+            className="h-[54vh]"
             ref={messagesEndRef}
           />
         </div>
