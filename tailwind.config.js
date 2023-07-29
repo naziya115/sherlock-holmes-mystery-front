@@ -13,7 +13,7 @@ module.exports = {
         default: ["var(--font-inter)", "system-ui", "sans-serif"],
       },
       animation: {
-        typing: "typing 3s steps(15)",
+        typing: "typing 3s steps(17)",
         // Fade up and down
         "fade-up": "fade-up 0.5s",
         "fade-down": "fade-down 0.5s",
@@ -24,7 +24,7 @@ module.exports = {
       keyframes: {
         typing: {
           from: { width: "0" },
-          to: { width: "15ch" }
+          to: { width: "17ch" }
         },
 
         // Fade up and down

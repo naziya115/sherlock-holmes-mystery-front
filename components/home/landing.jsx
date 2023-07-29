@@ -3,13 +3,6 @@ import Image from "next/image";
 import Balancer from "react-wrap-balancer";
 
 export default function Landing() {
-  // const [showText, setShowText] = useState(false);
-
-  // useEffect(() => {
-  //   setShowText(true);
-  // }, []);
-
-
   return (
     <Balancer>
       <Image
@@ -19,10 +12,10 @@ export default function Landing() {
         width={100}
       />
       
-      <h1 className="mb-1 text-3xl md:text-4xl lg:text-6xl xl:text-6xl font-mono text-black font-bold">
+      <h1 className="mb-1 text-xl md:text-4xl lg:text-6xl xl:text-6xl font-mono text-black font-bold">
         Elementary,
       </h1>
-      <h1 className="mb-1 text-3xl md:text-4xl lg:text-6xl xl:text-6xl text-black overflow-hidden whitespace-nowrap font-mono font-bold animate-typing">
+      <h1 className="mb-1 text-xl md:text-4xl lg:text-6xl xl:text-6xl text-black overflow-hidden whitespace-nowrap font-mono font-bold animate-typing">
         my dear Watson.
       </h1>
 
