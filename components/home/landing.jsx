@@ -19,16 +19,17 @@ export default function Landing() {
         width={100}
       />
       
-      <h1 className="mb-1 font-mono text-4xl text-black md:text-6xl">
+      <h1 className="mb-1 text-3xl md:text-4xl lg:text-6xl xl:text-6xl font-mono text-black font-bold">
         Elementary,
       </h1>
-      <h1 className="mb-1 font-mono text-4xl text-black md:text-6xl overflow-hidden whitespace-nowrap font-mono text-xl font-bold animate-typing">
+      <h1 className="mb-1 text-3xl md:text-4xl lg:text-6xl xl:text-6xl text-black overflow-hidden whitespace-nowrap font-mono font-bold animate-typing">
         my dear Watson.
       </h1>
 
-      <div className="text-xl font-semibold md:text-3xl">
-        generate your own story with Sherlock Holmes
+      <div className="text-xl md:text-3xl lg:text-3xl xl:text-3xl font-semibold">
+        * generate your own story with Sherlock Holmes
       </div>
+
     </Balancer>
   )
 }

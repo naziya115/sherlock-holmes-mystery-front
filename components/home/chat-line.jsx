@@ -1,4 +1,4 @@
-import { BookOpenIcon, UserIcon } from '@heroicons/react/24/outline'
+import Image from "next/image";
 
 // loading placeholder animation for the chat line
 export const LoadingChatLine = () => (
@@ -9,7 +9,13 @@ export const LoadingChatLine = () => (
       className="relative m-auto flex p-4 text-base md:max-w-2xl gap-2 md:gap-6 md:py-6 lg:max-w-2xl lg:px-0 xl:max-w-3xl"
     >
       <div className="min-w-[30px] lg:ml-4">
-        <BookOpenIcon />
+      <Image
+        src="/sherlock-holmes.png"
+        alt="Logo"
+        className="h-10 w-10 rounded-full"
+        width={20}
+        height={20}
+      />
       </div>
       <span className="animate-pulse cursor-default mt-1">▍</span>
     </div>
@@ -46,10 +52,22 @@ export function ChatLine({ role = 'assistant', content, isStreaming }) {
         <div className="min-w-[30px] lg:ml-4">
           {role === 'assistant'
             ? (
-              <BookOpenIcon />
+              <Image
+                    src="/sherlock-holmes.png"
+                    alt="Logo"
+                    className="h-10 w-10 rounded-full"
+                    width={20}
+                    height={20}
+                  />
             )
             : (
-              <UserIcon />
+              <Image
+              src="/dr-watson.png"
+              alt="Logo"
+              className="h-10 w-10 rounded-full"
+              width={20}
+              height={20}
+            />
             )
           }
         </div>

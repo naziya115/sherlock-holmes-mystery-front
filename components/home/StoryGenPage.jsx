@@ -28,7 +28,7 @@ const fetchStory = async () => {
   }
 };
 
-  // display only the latest part of the story
+// display only the latest part of the story
   function getSubstringAfterLastDollar(inputString) {
     const lastIndex = inputString.lastIndexOf("$");
 
@@ -48,13 +48,6 @@ function removeNumbersAndParentheses(text) {
 const StoryGenPage = () => {
   const [storyInfo, setStoryInfo] = useState(null);
   const [isPhone, setIsPhone] = useState(false);
-  const [activeTab, setActiveTab] = useState("Chat"); 
-
-  const handleTabChange = (tab) => {
-    setActiveTab(tab);
-  };
-
-
 
   useEffect(() => {
     // start a new story after the page is reloaded
@@ -78,13 +71,12 @@ const StoryGenPage = () => {
 
   // check for smaller screens
   useEffect(() => {
-    const mediaQuery = window.matchMedia('(max-width: 768px)'); // Adjust the max-width to the desired breakpoint for phones
+    const mediaQuery = window.matchMedia('(max-width: 768px)'); 
     setIsPhone(mediaQuery.matches);
 
     const handleResize = (event) => {
       setIsPhone(event.matches);
     };
-
     mediaQuery.addListener(handleResize);
     return () => mediaQuery.removeListener(handleResize);
   }, []);

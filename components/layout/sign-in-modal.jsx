@@ -1,14 +1,19 @@
 import { Dialog, Transition } from '@headlessui/react';
-import axios from "axios";
-import Image from "next/image";
-import { Fragment, useCallback, useMemo, useState } from "react";
+import axios from 'axios';
+import Image from 'next/image';
+import { Fragment, useCallback, useMemo, useState } from 'react';
 
 const SignInModal = ({ showSignInModal, setShowSignInModal }) => {
-  const [signInClicked, setSignInClicked] = useState(false);
   const [userName, setUserName] = useState('');
   const [password, setPassword] = useState('');
   const [token, setToken] = useState({});
   const [logged, setLogged] = useState(true);
+  const [messages, setMessages] = useState([]);
+
+  // show errors for the user
+  const addMessage = (text, type) => {
+    setMessages(() => [{ text, type }]);
+  };
 
   const loginUser = async (credentials) => {
     try {
@@ -23,67 +28,71 @@ const SignInModal = ({ showSignInModal, setShowSignInModal }) => {
       );
       return response.data;
     } catch (error) {
-      console.log('An error occurred:', error.response.data);
       throw error;
     }
+  };
+
+  const toggleMode = () => {
+    setLogged((prev) => !prev);
   };
 
   const registerUser = async (credentials) => {
     try {
-      const response = await axios.post('https://fastapi-lgg5.onrender.com/auth/users', credentials, {
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await axios.post(
+        'https://fastapi-lgg5.onrender.com/auth/users',
+        credentials,
+        {
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+        }
+      );
       return response.data;
     } catch (error) {
-      console.log('An error occurred:', error.response.data);
       throw error;
     }
   };
 
-  const registerBtn = () => {
-    setLogged(false);
-  };
-
-  const loggedInBtn = () => {
-    setLogged(true);
-  }
-
   const handleSubmit = async (e) => {
+    e.preventDefault();
     if (logged) {
-      e.preventDefault();
       try {
-        const token = await loginUser({ "username": userName, "password": password });
-        localStorage.setItem("token", token.access_token);
+        const token = await loginUser({ username: userName, password: password });
+        localStorage.setItem('token', token.access_token);
         setToken(token);
 
         if (token) {
-          console.log('Logged in successfully!');
+          addMessage('Logged in successfully!', 'success');
           window.location.reload();
         } else {
-          console.log('Login failed.');
+          addMessage('Login failed.', 'error');
         }
       } catch (error) {
-        console.log('An error occurred:', error);
+        addMessage('Check your credentials', 'error');
       }
     } else {
-
-      e.preventDefault();
       try {
-        const res = await registerUser({ "email": userName, "password": password });
-        console.log('Registered successfully!');
+        const token = await registerUser({ email: userName, password: password });
+        addMessage('Registered successfully!', 'success');
+        setToken(token);
+        localStorage.setItem('token', token.access_token);
+        setLogged(true);
+        window.location.reload();
       } catch (error) {
-        console.log('An error occurred:', error);
+        addMessage('Check your credentials', 'error');
       }
-
-    };
+    }
   };
 
   return (
     <Transition appear show={showSignInModal} as={Fragment}>
-      <Dialog as="div" className="relative z-40" open={showSignInModal} onClose={() => setShowSignInModal(false)}>
+      <Dialog
+        as="div"
+        className="relative z-40"
+        open={showSignInModal}
+        onClose={() => setShowSignInModal(false)}
+      >
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -116,15 +125,16 @@ const SignInModal = ({ showSignInModal, setShowSignInModal }) => {
                     width={20}
                     height={20}
                   />
-                  <h3 className="font-display text-2xl font-bold">Sign In</h3>
+                  <h3 className="font-display text-2xl font-bold">Sign {logged ? 'In' : 'Up'}</h3>
                 </div>
-
-                <form onSubmit={(e) => handleSubmit(e)} className="bg-white px-4 py-6 space-y-4">
+                 {/*fields*/}
+                <form onSubmit={handleSubmit} className="bg-white px-4 py-6 space-y-4">
                   <input
                     type="email"
                     value={userName}
                     onChange={(e) => setUserName(e.target.value)}
                     placeholder="Email"
+                    required
                     className="w-full p-2 border border-gray-300 rounded-md"
                   />
                   <input
@@ -132,22 +142,35 @@ const SignInModal = ({ showSignInModal, setShowSignInModal }) => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Password"
+                    required
                     className="w-full p-2 border border-gray-300 rounded-md"
                   />
-                  <button
-                    onClick={loggedInBtn}
-                    type="submit"
-                    className="w-full py-2 px-4 bg-stone-500 text-white rounded-md hover:bg-stone-600"
-                  >
-                    Login
-                  </button>
-
-                  <button
-                    onClick={registerBtn}
-                    className="w-full py-2 px-4 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400"
-                  >
-                    Register
-                  </button>
+                  {/*log in and register buttons*/}
+                  <div className="flex justify-center items-center">
+                    <button type="submit" className="inline-flex rounded-md items-center justify-center">
+                      <span className="h-10 flex items-center justify-center uppercase font-semibold px-8 bg-gray-300 text-gray-800 rounded-md border border-black hover:bg-black hover:text-white transition duration-500 ease-in-out">
+                        {logged ? 'Log In' : 'Register'}
+                      </span>
+                    </button>
+                  </div>
+                   {/*links for redirection*/}
+                  <p className="text-sm">
+                    {logged
+                      ? "Don't have an account?"
+                      : "Already have an account?"}
+                    <button type="button" className="text-blue-500 ml-1" onClick={toggleMode}>
+                      {logged ? 'Register' : 'Log In'}
+                    </button>
+                  </p>
+                   {/*message errors for the user*/}
+                  {messages.map((message, index) => (
+                    <p
+                      key={index}
+                      className={`text-sm ${message.type === 'error' ? 'text-red-500' : 'text-green-500'}`}
+                    >
+                      {message.text}
+                    </p>
+                  ))}
                 </form>
               </Dialog.Panel>
             </Transition.Child>
@@ -170,8 +193,8 @@ export function useSignInModal() {
     );
   }, [showSignInModal, setShowSignInModal]);
 
-  return useMemo(
-    () => ({ setShowSignInModal, SignInModal: SignInModalCallback }),
-    [setShowSignInModal, SignInModalCallback],
-  );
+  return useMemo(() => ({ setShowSignInModal, SignInModal: SignInModalCallback }), [
+    setShowSignInModal,
+    SignInModalCallback,
+  ]);
 }
