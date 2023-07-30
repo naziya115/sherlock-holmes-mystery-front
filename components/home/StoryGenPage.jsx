@@ -6,7 +6,6 @@ import Chat from './chat';
 // update the real-time generation with the story content
 const fetchStory = async () => {
   if (localStorage.getItem("story_id") != null) {
-    console.log("fetch story")
     try {
       const response = await axios.get(`https://fastapi-lgg5.onrender.com/stories/${localStorage.getItem("story_id")}`, {
         headers: {
@@ -45,27 +44,25 @@ const StoryGenPage = () => {
   const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() =>{
-    console.log(isGenerating)
-      if(isGenerating)
-        setIsGenerating(true);
+      if(isGenerating){
+        const fetchAndUpdateStory = async () => {
+          const story = await fetchStory();
+          if (story && story.story) {
+            const storyContent = getSubstringAfterLastDollar(story.story.content);
+            setStoryInfo(storyContent);
+          }
+        };
+    
+        const intervalId = setInterval(fetchAndUpdateStory, 5000);
+        fetchAndUpdateStory();
+        return () => clearInterval(intervalId);
+    }
   }, [isGenerating]);
 
   useEffect(() => {
     // start a new story after the page is reloaded
     localStorage.removeItem("story_id");
     localStorage.removeItem("next_question");
-
-    const fetchAndUpdateStory = async () => {
-      const story = await fetchStory();
-      if (story && story.story) {
-        const storyContent = getSubstringAfterLastDollar(story.story.content);
-        setStoryInfo(storyContent);
-      }
-    };
-
-    const intervalId = setInterval(fetchAndUpdateStory, 5000);
-    fetchAndUpdateStory();
-    return () => clearInterval(intervalId);
   }, []);
 
   // check for smaller screens
@@ -150,7 +147,6 @@ const StreamText = ({ content, setIsGenerating}) => {
 
         if (endIndex === content.length) {
           setShowCursor(true);
-          console.log("finished")
           if(content != "* Real-time story generation (if it does't work, just imagine) *")
             setIsGenerating(false);
           break;
