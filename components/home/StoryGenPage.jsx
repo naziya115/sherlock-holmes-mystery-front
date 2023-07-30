@@ -91,7 +91,16 @@ const StoryGenPage = () => {
                   {storyInfo && (
                     <StreamText content={removeNumbersAndParentheses(storyInfo)} setIsGenerating={setIsGenerating}/>
                   )}
-                  {isGenerating && (<span className="generating-text mt-auto">generating...</span> )}
+                  {isGenerating && (
+                    <div className="generating-text mt-auto relative flex items-center">
+                      <span className="text-base mr-2">generating...</span>
+                      <img
+                        className="max-w-12 h-12 right-0"
+                        src="sherlock-holmes-animated.gif"
+                        alt="Generating Sherlock Holmes GIF"
+                      />
+                    </div>
+                  )} 
                 </>
             </div>
           </div>
