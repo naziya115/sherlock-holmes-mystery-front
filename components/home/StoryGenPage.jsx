@@ -6,6 +6,7 @@ import Chat from './chat';
 // update the real-time generation with the story content
 const fetchStory = async () => {
   if (localStorage.getItem("story_id") != null) {
+    console.log("fetch story")
     try {
       const response = await axios.get(`https://fastapi-lgg5.onrender.com/stories/${localStorage.getItem("story_id")}`, {
         headers: {
@@ -18,13 +19,6 @@ const fetchStory = async () => {
       console.error("Error fetching story:", error);
       return {};
     }
-  } else {
-    const story = {
-      story: {
-        content: "* Real-time story generation (if it does't work, just imagine) *"
-      }
-    };
-    return story;
   }
 };
 
@@ -46,8 +40,15 @@ function removeNumbersAndParentheses(text) {
 }
 
 const StoryGenPage = () => {
-  const [storyInfo, setStoryInfo] = useState(null);
+  const [storyInfo, setStoryInfo] = useState("* Real-time story generation (if it does't work, just imagine) *");
   const [isPhone, setIsPhone] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  useEffect(() =>{
+    console.log(isGenerating)
+      if(isGenerating)
+        setIsGenerating(true);
+  }, [isGenerating]);
 
   useEffect(() => {
     // start a new story after the page is reloaded
@@ -63,9 +64,7 @@ const StoryGenPage = () => {
     };
 
     const intervalId = setInterval(fetchAndUpdateStory, 5000);
-
     fetchAndUpdateStory();
-
     return () => clearInterval(intervalId);
   }, []);
 
@@ -82,35 +81,43 @@ const StoryGenPage = () => {
   }, []);
 
   return (
-    // display story
     <>
-    {!isPhone ? (
-      <div className="flex flex-column w-full h-[90vh] overflow-auto">
-        <div className="flex inset-y-0 left-0 basis-2/5"><Chat/></div>
-        <div className="flex inset-y-0 right-0 basis-3/5 p-8 text-black text-base antialiased animate-typing pr-16 break-normal">
-          {storyInfo && (
-            <StreamText content={removeNumbersAndParentheses(storyInfo)} />
-          )}
-        </div>
-      </div>
-    ) : (
-      <>
-        <div className="flex flex-col h-screen">
-          <div className='overflow-auto h-1/2'><Chat /></div>
-          <div className='overflow-auto h-1/2 bg-white p-4'>
-            {storyInfo && (
-              <StreamText content={removeNumbersAndParentheses(storyInfo)} />
-            )}
+      {!isPhone ? (
+        <div className="flex flex-column w-full h-[90vh] overflow-auto">
+          <div className="flex inset-y-0 left-0 basis-2/5"><Chat setIsGenerating={setIsGenerating} /></div>
+          <div className="flex inset-y-0 right-0 basis-3/5 p-8 text-black text-base antialiased animate-typing pr-16 break-normal">
+            <div className="story-container relative flex flex-col">
+                <>
+                  {storyInfo && (
+                    <StreamText content={removeNumbersAndParentheses(storyInfo)} setIsGenerating={setIsGenerating}/>
+                  )}
+                  {isGenerating && (<span className="generating-text mt-auto">generating...</span> )}
+                </>
+            </div>
           </div>
         </div>
-      </>
-    )}
+      ) : (
+        <>
+          <div className="flex flex-col h-screen">
+            <div className='overflow-auto h-1/2'><Chat /></div>
+            <div className='overflow-auto h-1/2 bg-white p-4'>
+                <>
+                  {storyInfo && (
+                    <StreamText content={removeNumbersAndParentheses(storyInfo)} setIsGenerating={setIsGenerating}/>
+                  )}
+                   {isGenerating && (<span className="generating-text mt-auto">generating...</span> )}
+                </>
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
+  
 };
 
 // stream story content
-const StreamText = ({ content }) => {
+const StreamText = ({ content, setIsGenerating}) => {
   const [displayedContent, setDisplayedContent] = useState('');
   const [lastStreamedIndex, setLastStreamedIndex] = useState(0);
   const [showCursor, setShowCursor] = useState(true);
@@ -126,13 +133,17 @@ const StreamText = ({ content }) => {
       for (let chunk = lastStreamedIndex; chunk < totalChunks; chunk++) {
         const startIndex = chunk * chunkSize;
         const endIndex = Math.min(startIndex + chunkSize, content.length);
-        // evil
+        // buggy stuff 
         currentContent = content.slice(0, endIndex).replace(/\n\n/g, '<br />');
+
         setDisplayedContent(currentContent);
         setLastStreamedIndex(chunk);
 
         if (endIndex === content.length) {
           setShowCursor(true);
+          console.log("finished")
+          if(content != "* Real-time story generation (if it does't work, just imagine) *")
+            setIsGenerating(false);
           break;
         }
 
@@ -142,9 +153,11 @@ const StreamText = ({ content }) => {
 
     displayStream();
   }, [content, lastStreamedIndex]);
+  
 
   // move cursor as the story content is streamed
   useEffect(() => {
+
     const cursorInterval = setInterval(() => {
       setShowCursor((prevShowCursor) => !prevShowCursor);
     }, 500);

@@ -31,7 +31,7 @@ import { ChatLine, LoadingChatLine } from './chat-line'
   }
   
 
-  const InputMessage = ({ input, setInput, sendMessage, loading, setSherlockSolution}) => {
+  const InputMessage = ({ input, setInput, sendMessage, loading, setSherlockSolution, setIsGenerating}) => {
     const inputRef = useRef(null)
     const [isStoryStageButton, setStoryStageButtonVisible] = useState(true);
     const [isInputMessageVisible, setInputMessageVisible] = useState(false);
@@ -39,6 +39,7 @@ import { ChatLine, LoadingChatLine } from './chat-line'
     const [mainSuspects, setMainSuspects] = useState([]);
     const [storyStageButtonContent, setStoryStageButtonContent] = useState('Set the Setting');
     const[finishedStory, setFinishedStory] = useState(false);
+
     const shouldShowLoadingIcon = loading 
     const inputActive = input !== '' && !shouldShowLoadingIcon
     const storyId = localStorage.getItem('story_id');
@@ -70,7 +71,7 @@ import { ChatLine, LoadingChatLine } from './chat-line'
         setStoryStageButtonVisible(false);
       } else {
         StartCase();
-        sendMessage("Who is the criminal", true);
+        sendMessage("My dear Watson, who do you think is the criminal?", true);
         setInputMessageVisible(false);
         setStoryStageButtonVisible(false);
       }
@@ -79,6 +80,8 @@ import { ChatLine, LoadingChatLine } from './chat-line'
     // finish the story
     const FinishStory = async() => {
       try {
+        // set loading while generating
+        setIsGenerating(true);
         const response = await Request({ route: "conclusion"});
         if (!response.ok)
           throw new Error('Failed to fetch data');
@@ -90,6 +93,9 @@ import { ChatLine, LoadingChatLine } from './chat-line'
     // set the setting of the story
     const SetStory = async () => {
       try {
+        // set loading while generating
+        setIsGenerating(true);
+
         const response = await Request({ route: "setting" });
         if (!response.ok) {
           throw new Error('Failed to fetch data');
@@ -105,6 +111,8 @@ import { ChatLine, LoadingChatLine } from './chat-line'
     // start the case
     const StartCase = async () => {
       try {
+        // set loading while generating
+        setIsGenerating(true);
         const response = await Request({ route: "case_intro" });
         if (!response.ok) {
           throw new Error('Failed to fetch story content');
@@ -118,6 +126,8 @@ import { ChatLine, LoadingChatLine } from './chat-line'
 
     const getMainSuspects = async() => {
       try {
+        // set loading while generating
+        setIsGenerating(true);
         const response = await Request({ route: "main_suspects", method: "GET"});
         if (!response.ok) {
           throw new Error('Failed to fetch story content');
@@ -152,6 +162,8 @@ import { ChatLine, LoadingChatLine } from './chat-line'
 
     const getInvestigation = async() =>{
       try {
+        // set loading while generating
+        setIsGenerating(true);
         const response = await Request({ route: "investigation" });
         if (!response.ok) {
           throw new Error('Failed to fetch story content');
@@ -164,6 +176,8 @@ import { ChatLine, LoadingChatLine } from './chat-line'
 
     const getSherlockSolution = async() => {
       try {
+        // set loading while generating
+        setIsGenerating(true);
         const response = await Request({ route: "solution" });
         if (!response.ok) {
           throw new Error('Failed to fetch data');
@@ -183,13 +197,13 @@ import { ChatLine, LoadingChatLine } from './chat-line'
       {/* set Main Suspects of the case */}
       {isMainSuspectsVisible && (
         <div id="buttonsContainer" className="flex flex-col items-center">
+          <p className="mb-6 mt-8">Choose one of the three options:</p>
           {mainSuspects.map((name, index) => (
             <div key={index}>
-              <button
-                onClick={() => handleMainSuspectsButton(name)}
-                className="bg-black text-white px-4 py-2 rounded-md mb-3"
-              >
-                {name}
+              <button onClick={() => handleMainSuspectsButton(name)} className="inline-flex rounded-md items-center justify-center mb-4">
+                <span className="h-10 flex items-center justify-center uppercase font-semibold px-8 bg-gray-300 text-gray-800 rounded-md border border-black hover:bg-black hover:text-white transition duration-500 ease-in-out p-2">
+                  {name}
+                </span>
               </button>
             </div>
           ))}
@@ -198,11 +212,10 @@ import { ChatLine, LoadingChatLine } from './chat-line'
 
       
       {isStoryStageButton && (
-        <button
-          className="inline-flex items-center rounded border border-neutral-200 bg-white py-2 pr-4 text-black text-sm hover:opacity-50 disabled:opacity-25"
-          onClick={StoryStage}
-        >
-          <div className="w-4 h-4"></div> {storyStageButtonContent}
+        <button onClick={StoryStage} className="inline-flex rounded-md items-center justify-center">
+          <span className="h-10 flex items-center justify-center uppercase font-semibold px-8 bg-gray-300 text-gray-800 rounded-md border border-black hover:bg-black hover:text-white transition duration-500 ease-in-out">
+            {storyStageButtonContent}
+          </span>
         </button>
       )}
         
@@ -321,7 +334,7 @@ import { ChatLine, LoadingChatLine } from './chat-line'
     };
     
 
-  export default function Chat() {
+  export default function Chat({setIsGenerating}) {
     const [input, setInput] = useState('')
     const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
     const messagesEndRef = useRef(null);
@@ -329,6 +342,9 @@ import { ChatLine, LoadingChatLine } from './chat-line'
     const { messages, isMessageStreaming, loading, error, sendMessage} = useMessages()
     const [sherlockSolution, setSherlockSolution] = useState(null)
 
+    // check if IsGenerating is true
+    useEffect(() => {
+    }, [setIsGenerating]);
 
     const handleScroll = () => {
       if (chatContainerRef.current) {
@@ -391,7 +407,7 @@ import { ChatLine, LoadingChatLine } from './chat-line'
           sendMessage={sendMessage}
           loading={loading || isMessageStreaming}
           setSherlockSolution={setSherlockSolution}
-          
+          setIsGenerating={setIsGenerating}
         />
         <Toaster />
       </div>

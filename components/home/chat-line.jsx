@@ -10,11 +10,11 @@ export const LoadingChatLine = () => (
     >
       <div className="min-w-[30px] lg:ml-4">
       <Image
-        src="/sherlock-holmes.png"
+        src="/sherlock-holmes-chat.ico"
         alt="Logo"
-        className="h-10 w-10 rounded-full"
-        width={20}
-        height={20}
+        className="h-16 w-16 rounded"
+        width={16}
+        height={16}
       />
       </div>
       <span className="animate-pulse cursor-default mt-1">▍</span>
@@ -53,20 +53,20 @@ export function ChatLine({ role = 'assistant', content, isStreaming }) {
           {role === 'assistant'
             ? (
               <Image
-                    src="/sherlock-holmes.png"
+                    src="/sherlock-holmes-chat.ico"
                     alt="Logo"
-                    className="h-10 w-10 rounded-full"
-                    width={20}
-                    height={20}
+                    className="h-16 w-16 rounded"
+                    width={16}
+                    height={16}
                   />
             )
             : (
               <Image
-              src="/dr-watson.png"
+              src="/dr-watson-chat.ico"
               alt="Logo"
-              className="h-10 w-10 rounded-full"
-              width={20}
-              height={20}
+              className="h-16 w-16 rounded"
+              width={16}
+              height={16}
             />
             )
           }
