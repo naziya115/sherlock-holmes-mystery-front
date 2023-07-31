@@ -30,6 +30,7 @@ export default function UserDropdown({ token }) {
               src='/avatar.png'
               width={40}
               height={40}
+              priority={true}
               className="rounded-full"
             />
           </Menu.Button>

@@ -33,7 +33,10 @@ const Story = () => {
   const fetchData = async () => {
     try {
       const story = await fetchStory(id);
-      const updatedContent = story.story.content.replaceAll("$", "<br>");
+      let updatedContent = story.story.content.replaceAll("%", "<br>").replaceAll(/\n+/g, "<br>").replaceAll("$", "<br>").replace(/(<br\s*\/?>)\1+/g, "$1");
+
+
+
       setStoryInfo(
         <div className="px-4 lg:w-[80%] md:px-8 lg:px-16 xl:px-20">
           <h1 className="text-2xl text-center my-8">{story.story.title}</h1>

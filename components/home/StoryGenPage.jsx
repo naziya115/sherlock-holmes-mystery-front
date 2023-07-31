@@ -22,11 +22,12 @@ const fetchStory = async () => {
 };
 
 // display only the latest part of the story
-  function getSubstringAfterLastDollar(inputString) {
-    const lastIndex = inputString.lastIndexOf("$");
+  function getSubstringAfterLastMod(inputString) {
+    const lastIndex = inputString.lastIndexOf("%");
 
     if (lastIndex !== -1) {
-      return inputString.slice(lastIndex + 1);
+      if(!inputString.slice(lastIndex + 1).includes("$"))
+        return inputString.slice(lastIndex + 1);
     } else {
       return inputString;
     }
@@ -48,8 +49,11 @@ const StoryGenPage = () => {
         const fetchAndUpdateStory = async () => {
           const story = await fetchStory();
           if (story && story.story) {
-            const storyContent = getSubstringAfterLastDollar(story.story.content);
-            setStoryInfo(storyContent);
+            const storyContent = getSubstringAfterLastMod(story.story.content);
+            if(storyContent != storyInfo){
+              setStoryInfo("");
+              setStoryInfo(storyContent);   
+            }
           }
         };
     
@@ -81,13 +85,14 @@ const StoryGenPage = () => {
     <>
       {!isPhone ? (
         <div className="flex flex-column w-full h-[90vh] overflow-auto">
-          <div className="flex inset-y-0 left-0 basis-2/5"><Chat setIsGenerating={setIsGenerating} /></div>
+          <div className="flex inset-y-0 left-0 basis-2/5"><Chat setIsGenerating={setIsGenerating}/></div>
           <div className="flex inset-y-0 right-0 basis-3/5 p-8 text-black text-base antialiased animate-typing pr-16 break-normal">
             <div className="story-container relative flex flex-col">
                 <>
-                  {storyInfo && (
+                {storyInfo && (
                     <StreamText content={removeNumbersAndParentheses(storyInfo)} setIsGenerating={setIsGenerating}/>
                   )}
+        
                   {isGenerating && (
                     <div className="generating-text mt-auto relative flex items-center">
                       <span className="text-base mr-2">generating...</span>
@@ -125,55 +130,35 @@ const StoryGenPage = () => {
 // stream story content
 const StreamText = ({ content, setIsGenerating}) => {
   const [displayedContent, setDisplayedContent] = useState('');
-  const [lastStreamedIndex, setLastStreamedIndex] = useState(0);
-  const [showCursor, setShowCursor] = useState(true);
+  const [currentChunkIndex, setCurrentChunkIndex] = useState(0);
+  const chunkSize  = 50;
+  let speed = 200;
 
   useEffect(() => {
-    let currentContent = '';
+    let interval;
+    const chunks = content.match(new RegExp(`.{1,${chunkSize}}`, 'g')) || [];
 
-    const displayStream = async () => {
-      // divide story content into chunks to make steaming more efficient
-      const chunkSize = 50; 
-      const totalChunks = Math.ceil(content.length / chunkSize);
+    if (currentChunkIndex < chunks.length) {
+      interval = setInterval(() => {
+        setCurrentChunkIndex((prevIndex) => prevIndex + 1);
+      }, speed);
+    }else{
+      setIsGenerating(false);
+    }
 
-      for (let chunk = lastStreamedIndex; chunk < totalChunks; chunk++) {
-        const startIndex = chunk * chunkSize;
-        const endIndex = Math.min(startIndex + chunkSize, content.length);
-        // buggy stuff 
-        currentContent = content.slice(0, endIndex).replace(/\n\n/g, '<br />');
+    return () => clearInterval(interval);
+  }, [currentChunkIndex, content, chunkSize, speed]);
 
-        setDisplayedContent(currentContent);
-        setLastStreamedIndex(chunk);
-
-        if (endIndex === content.length) {
-          setShowCursor(true);
-          if(content != "* Real-time story generation (if it does't work, just imagine) *")
-            setIsGenerating(false);
-          break;
-        }
-
-        await new Promise((resolve) => setTimeout(resolve, 100));
-      }
-    };
-
-    displayStream();
-  }, [content, lastStreamedIndex]);
-  
-
-  // move cursor as the story content is streamed
   useEffect(() => {
-
-    const cursorInterval = setInterval(() => {
-      setShowCursor((prevShowCursor) => !prevShowCursor);
-    }, 500);
-
-    return () => clearInterval(cursorInterval);
-  }, []);
+    const chunks = content.match(new RegExp(`.{1,${chunkSize}}`, 'g')) || [];
+    const currentChunk = chunks.slice(0, currentChunkIndex + 1).join('');
+    setDisplayedContent(currentChunk.replace(/\n\n/g, '<br />'));
+  }, [currentChunkIndex, content, chunkSize]);
 
   return (
     <span>
       <div style={{ display: 'inline' }} dangerouslySetInnerHTML={{ __html: displayedContent }} />
-      {showCursor && <span style={{ display: 'inline', opacity: 0.7 }}>|</span>}
+      <span style={{ display: 'inline', opacity: 0.7 }}>|</span>
     </span>
   );
 };
