@@ -73,10 +73,14 @@ const SignInModal = ({ showSignInModal, setShowSignInModal }) => {
       }
     } else {
       try {
-        const token = await registerUser({ email: userName, password: password });
+        const response = await registerUser({ email: userName, password: password });
         addMessage('Registered successfully!', 'success');
-        setToken(token);
+        
+        
+        const token = await loginUser({ username: userName, password: password });
         localStorage.setItem('token', token.access_token);
+        setToken(token);
+        
         setLogged(true);
         window.location.reload();
       } catch (error) {
