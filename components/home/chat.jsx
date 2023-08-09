@@ -134,7 +134,7 @@ import { ChatLine, LoadingChatLine } from './chat-line'
         }
         const responseData = await response.json();
         const { sherlock_message } = responseData;
-        const suspects = sherlock_message.split('\n');
+        const suspects = sherlock_message.split(',');
         setMainSuspects(suspects);
         setMainSuspectsVisible(true);
         setStoryStageButtonVisible(false);

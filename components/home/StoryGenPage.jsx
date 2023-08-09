@@ -26,7 +26,7 @@ const fetchStory = async () => {
     const lastIndex = inputString.lastIndexOf("%");
 
     if (lastIndex !== -1) {
-      if(!inputString.slice(lastIndex + 1).includes("$"))
+      if(!(inputString.slice(lastIndex + 1).includes("$")))
         return inputString.slice(lastIndex + 1);
     } else {
       return inputString;
